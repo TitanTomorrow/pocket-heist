@@ -47,6 +47,10 @@ svg.logo {
   @apply mt-6 grid grid-cols-1 gap-6 md:grid-cols-2;
 }
 
+.preview-row {
+  @apply mt-4 flex flex-wrap items-center gap-4;
+}
+
 /* buttons */
 .btn {
   @apply inline-block rounded-lg bg-primary px-4 py-2 font-semibold text-dark transition-colors duration-200;
