@@ -1,0 +1,41 @@
+@reference "../../app/globals.css";
+
+.skeleton {
+  @apply w-full max-w-2xl rounded-xl border border-lighter bg-light p-8 animate-pulse;
+}
+
+.header {
+  @apply flex items-center gap-6;
+}
+
+.avatar {
+  @apply size-24 shrink-0 rounded-full bg-lighter;
+}
+
+.headerLines {
+  @apply flex flex-1 flex-col gap-6;
+}
+
+.body {
+  @apply mt-12 flex flex-col gap-6;
+}
+
+.line {
+  @apply h-4 rounded-md bg-lighter;
+}
+
+.lineFull {
+  @apply w-full;
+}
+
+.lineLong {
+  @apply w-4/5;
+}
+
+.lineShort {
+  @apply w-3/4;
+}
+
+.srOnly {
+  @apply sr-only;
+}
