@@ -24,7 +24,7 @@ Run `npx vitest run tests/components/AuthForm.test.tsx` from **PowerShell** (the
 - `AuthForm.tsx`: `"use client"`, prop `mode: "login" | "signup"`, no semicolons.
   - State: `email`, `password`, `confirmPassword`, `showPassword`, `error`.
   - Inputs: `type="email"` + `required`; password(s) `type={showPassword ? "text" : "password"}` + `required`. Autocomplete: `email`, `current-password` (login) and `new-password` (both signup fields). Labels "Email", "Password", "Confirm password" linked through `htmlFor`/`id`.
-  - Toggle: `<button type="button">` with Lucite `Eye` / `EyeOff`, `aria-label` "Show password" / "Hide password", placed beside the password input in a relatively positioned wrapper.
+  - Toggle: `<button type="button">` with Lucide `Eye` / `EyeOff`, `aria-label` "Show password" / "Hide password", placed beside the password input in a relatively positioned wrapper.
   - Submit handler: `preventDefault`. In signup mode, check length < 6 → set error ("Password must be at least 6 characters"), then mismatch → set error ("Passwords do not match"), and return. Otherwise log `{ mode, email: email.trim().toLowerCase(), password }`. After a valid signup, reset all fields, `showPassword` and `error`.
   - Editing either password field clears `error`.
   - Error rendered as `<p role="alert">` below the confirm field (signup only).
