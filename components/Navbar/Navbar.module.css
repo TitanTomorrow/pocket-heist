@@ -16,3 +16,16 @@
   @apply inline-block align-baseline;
 }
 
+.createButton {
+  @apply inline-flex h-10 items-center gap-2 rounded-[10px] px-4;
+  @apply bg-linear-to-r/srgb from-purple-600 to-pink-600;
+  @apply text-base leading-6 font-normal tracking-[-0.3125px] text-white;
+  @apply transition-[filter] duration-200;
+}
+.createButton:hover {
+  @apply brightness-110;
+}
+.createButton:focus-visible {
+  @apply outline-2 outline-offset-2 outline-secondary;
+}
+
