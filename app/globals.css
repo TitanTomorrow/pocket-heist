@@ -35,7 +35,7 @@ svg.logo {
 
 /* generic page styles */
 .page-content {
-  @apply my-4 mx-auto w-6xl min-w-2xl max-w-full;
+  @apply my-4 mx-auto w-6xl max-w-full;
 }
 .center-content {
   @apply flex flex-col justify-center text-justify min-h-lvh;
