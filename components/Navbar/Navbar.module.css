@@ -12,3 +12,7 @@
   @apply font-bold text-xl;
 }
 
+.logo {
+  @apply inline-block align-baseline;
+}
+

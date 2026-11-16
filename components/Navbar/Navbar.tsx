@@ -8,10 +8,7 @@ export default function Navbar() {
       <nav>
         <header>
           <h1>
-            <Link href="/heists">
-              P<Clock8 className={styles.logo} size={14} strokeWidth={2.75} />
-              cket Heist
-            </Link>
+            <Link href="/heists">P<Clock8 className={styles.logo} size={14} strokeWidth={2.75} />cket Heist</Link>
           </h1>
           <div>📎 Steal the stapler. 💼 Keep your job. 😎</div>
         </header>
