@@ -13,7 +13,7 @@ export default function Navbar() {
               cket Heist
             </Link>
           </h1>
-          <div>Tiny missions. Big office mischief.</div>
+          <div>📎 Steal the stapler. 💼 Keep your job. 😎</div>
         </header>
         <ul>
           <li>
