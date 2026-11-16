@@ -1,7 +1,7 @@
 # Spec for <feature_title>
 
 branch: <branch_name>
-figma_component (if used): <figma-component-name>
+figma_component (if used): <figma_component_name>
 
 ## Summary
 ...

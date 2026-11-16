@@ -42,3 +42,7 @@ The project custom slash commands in `.claude/commands/` define the expected wor
 - Do NOT apply tailwind classes directly in component templates unless essential or just 1 at the most. If an element needs more than a single tailwind class, combine them into a custom class using the '@apply' directive
 - Use minimal project dependencies where possible.
 - Use the 'git switch -c' command to switch to new branches, no 'git checkout'
+
+## Check Documentation
+
+- Before writing code that uses a library or framework API (Next.js 16, React 19, Tailwind v4, Vitest), look up the current docs with the Context7 MCP server rather than relying on memory. These versions are newer than most training data.
