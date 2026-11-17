@@ -1,19 +1,32 @@
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
+import { describe, it, expect, vi, beforeEach } from "vitest"
+
+const { mockPush, mockSignIn, mockSignUp } = vi.hoisted(() => ({
+  mockPush: vi.fn(),
+  mockSignIn: vi.fn(),
+  mockSignUp: vi.fn(),
+}))
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush }),
+}))
+
+vi.mock("@/lib/firebase", () => ({ auth: { name: "test-auth" } }))
+
+vi.mock("firebase/auth", () => ({
+  signInWithEmailAndPassword: mockSignIn,
+  createUserWithEmailAndPassword: mockSignUp,
+}))
 
 // component imports
 import AuthForm from "@/components/AuthForm"
 
 describe("AuthForm", () => {
-  let logSpy: ReturnType<typeof vi.spyOn>
-
   beforeEach(() => {
-    logSpy = vi.spyOn(console, "log").mockImplementation(() => {})
-  })
-
-  afterEach(() => {
-    logSpy.mockRestore()
+    vi.clearAllMocks()
+    mockSignIn.mockResolvedValue({})
+    mockSignUp.mockResolvedValue({})
   })
 
   it("renders the login fields, button and signup link", () => {
@@ -43,7 +56,7 @@ describe("AuthForm", () => {
 
     await user.click(screen.getByRole("button", { name: "Hide password" }))
     expect(password).toHaveAttribute("type", "password")
-    expect(logSpy).not.toHaveBeenCalled()
+    expect(mockSignIn).not.toHaveBeenCalled()
   })
 
   it("toggles both password fields in signup mode", async () => {
@@ -54,17 +67,25 @@ describe("AuthForm", () => {
     expect(screen.getByLabelText("Confirm password")).toHaveAttribute("type", "text")
   })
 
-  it("logs the trimmed, lowercased email and password on login", async () => {
+  it("logs in with the trimmed, lowercased email and goes to /heists", async () => {
     const user = userEvent.setup()
     render(<AuthForm mode="login" />)
     await user.type(screen.getByLabelText("Email"), "  Name@Example.COM ")
     await user.type(screen.getByLabelText("Password"), "secret1")
     await user.click(screen.getByRole("button", { name: "Log in" }))
-    expect(logSpy).toHaveBeenCalledWith({
-      mode: "login",
-      email: "name@example.com",
-      password: "secret1",
-    })
+    expect(mockSignIn).toHaveBeenCalledWith({ name: "test-auth" }, "name@example.com", "secret1")
+    expect(mockPush).toHaveBeenCalledWith("/heists")
+  })
+
+  it("shows an error and stays put when login fails", async () => {
+    mockSignIn.mockRejectedValue({ code: "auth/invalid-credential" })
+    const user = userEvent.setup()
+    render(<AuthForm mode="login" />)
+    await user.type(screen.getByLabelText("Email"), "a@b.com")
+    await user.type(screen.getByLabelText("Password"), "wrong1")
+    await user.click(screen.getByRole("button", { name: "Log in" }))
+    expect(await screen.findByRole("alert")).toHaveTextContent("Incorrect email or password")
+    expect(mockPush).not.toHaveBeenCalled()
   })
 
   it("blocks signup when the passwords do not match", async () => {
@@ -75,7 +96,7 @@ describe("AuthForm", () => {
     await user.type(screen.getByLabelText("Confirm password"), "secret2")
     await user.click(screen.getByRole("button", { name: "Sign up" }))
     expect(screen.getByRole("alert")).toHaveTextContent("Passwords do not match")
-    expect(logSpy).not.toHaveBeenCalled()
+    expect(mockSignUp).not.toHaveBeenCalled()
   })
 
   it("blocks signup when the password is shorter than 6 characters", async () => {
@@ -86,23 +107,31 @@ describe("AuthForm", () => {
     await user.type(screen.getByLabelText("Confirm password"), "abc12")
     await user.click(screen.getByRole("button", { name: "Sign up" }))
     expect(screen.getByRole("alert")).toBeInTheDocument()
-    expect(logSpy).not.toHaveBeenCalled()
+    expect(mockSignUp).not.toHaveBeenCalled()
   })
 
-  it("logs and clears the fields after a valid signup", async () => {
+  it("creates the account and goes to /heists after a valid signup", async () => {
+    const user = userEvent.setup()
+    render(<AuthForm mode="signup" />)
+    await user.type(screen.getByLabelText("Email"), "A@B.com")
+    await user.type(screen.getByLabelText("Password"), "secret1")
+    await user.type(screen.getByLabelText("Confirm password"), "secret1")
+    await user.click(screen.getByRole("button", { name: "Sign up" }))
+    expect(mockSignUp).toHaveBeenCalledWith({ name: "test-auth" }, "a@b.com", "secret1")
+    expect(mockPush).toHaveBeenCalledWith("/heists")
+  })
+
+  it("shows an error when the email is already registered", async () => {
+    mockSignUp.mockRejectedValue({ code: "auth/email-already-in-use" })
     const user = userEvent.setup()
     render(<AuthForm mode="signup" />)
     await user.type(screen.getByLabelText("Email"), "a@b.com")
     await user.type(screen.getByLabelText("Password"), "secret1")
     await user.type(screen.getByLabelText("Confirm password"), "secret1")
     await user.click(screen.getByRole("button", { name: "Sign up" }))
-    expect(logSpy).toHaveBeenCalledWith({
-      mode: "signup",
-      email: "a@b.com",
-      password: "secret1",
-    })
-    expect(screen.getByLabelText("Email")).toHaveValue("")
-    expect(screen.getByLabelText("Password")).toHaveValue("")
-    expect(screen.getByLabelText("Confirm password")).toHaveValue("")
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "An account with this email already exists",
+    )
+    expect(mockPush).not.toHaveBeenCalled()
   })
 })

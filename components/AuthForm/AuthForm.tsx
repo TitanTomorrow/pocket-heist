@@ -2,7 +2,13 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Eye, EyeOff } from "lucide-react"
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth"
+import { auth } from "@/lib/firebase"
 import styles from "./AuthForm.module.css"
 
 type AuthMode = "login" | "signup"
@@ -13,18 +19,34 @@ interface AuthFormProps {
 
 const MIN_PASSWORD_LENGTH = 6
 
+const AUTH_ERROR_MESSAGES: Record<string, string> = {
+  "auth/invalid-credential": "Incorrect email or password",
+  "auth/email-already-in-use": "An account with this email already exists",
+  "auth/invalid-email": "Please enter a valid email address",
+  "auth/weak-password": `Password must be at least ${MIN_PASSWORD_LENGTH} characters`,
+  "auth/too-many-requests": "Too many attempts. Please try again later",
+  "auth/network-request-failed": "Network error. Check your connection and try again",
+}
+
+function authErrorMessage(err: unknown) {
+  const code = (err as { code?: string })?.code ?? ""
+  return AUTH_ERROR_MESSAGES[code] ?? "Something went wrong. Please try again"
+}
+
 export default function AuthForm({ mode }: AuthFormProps) {
   const isSignup = mode === "signup"
+  const router = useRouter()
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
+  const [submitting, setSubmitting] = useState(false)
 
   const passwordType = showPassword ? "text" : "password"
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
     if (isSignup) {
@@ -38,14 +60,20 @@ export default function AuthForm({ mode }: AuthFormProps) {
       }
     }
 
-    console.log({ mode, email: email.trim().toLowerCase(), password })
+    const cleanEmail = email.trim().toLowerCase()
+    setSubmitting(true)
+    setError("")
 
-    if (isSignup) {
-      setEmail("")
-      setPassword("")
-      setConfirmPassword("")
-      setShowPassword(false)
-      setError("")
+    try {
+      if (isSignup) {
+        await createUserWithEmailAndPassword(auth, cleanEmail, password)
+      } else {
+        await signInWithEmailAndPassword(auth, cleanEmail, password)
+      }
+      router.push("/heists")
+    } catch (err) {
+      setError(authErrorMessage(err))
+      setSubmitting(false)
     }
   }
 
@@ -60,7 +88,10 @@ export default function AuthForm({ mode }: AuthFormProps) {
           required
           className={styles.input}
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value)
+            setError("")
+          }}
         />
       </div>
 
@@ -105,11 +136,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
               setError("")
             }}
           />
-          {error && <p role="alert" className={styles.error}>{error}</p>}
         </div>
       )}
 
-      <button type="submit" className="btn">
+      {error && <p role="alert" className={styles.error}>{error}</p>}
+
+      <button type="submit" className="btn" disabled={submitting}>
         {isSignup ? "Sign up" : "Log in"}
       </button>
 
