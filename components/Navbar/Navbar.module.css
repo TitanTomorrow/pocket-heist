@@ -16,6 +16,28 @@
   @apply inline-block align-baseline;
 }
 
+.siteNav ul {
+  @apply flex items-center gap-4;
+}
+
+.userSlot {
+  @apply flex w-56 items-center justify-end gap-3;
+}
+
+.codeName {
+  @apply min-w-0 truncate font-semibold text-heading;
+}
+
+.logoutButton {
+  @apply shrink-0 text-sm text-body transition-colors duration-200;
+}
+.logoutButton:hover {
+  @apply text-primary;
+}
+.logoutButton:focus-visible {
+  @apply outline-2 outline-offset-2 outline-secondary;
+}
+
 .createButton {
   @apply inline-flex h-10 items-center gap-2 rounded-[10px] px-4;
   @apply bg-linear-to-r/srgb from-purple-600 to-pink-600;

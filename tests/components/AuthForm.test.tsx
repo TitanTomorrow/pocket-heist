@@ -2,9 +2,9 @@ import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
-const { mockPush, mockSignIn, mockSignUp } = vi.hoisted(() => ({
+const { mockPush, mockLogIn, mockSignUp } = vi.hoisted(() => ({
   mockPush: vi.fn(),
-  mockSignIn: vi.fn(),
+  mockLogIn: vi.fn(),
   mockSignUp: vi.fn(),
 }))
 
@@ -12,11 +12,8 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
 }))
 
-vi.mock("@/lib/firebase", () => ({ auth: { name: "test-auth" } }))
-
-vi.mock("firebase/auth", () => ({
-  signInWithEmailAndPassword: mockSignIn,
-  createUserWithEmailAndPassword: mockSignUp,
+vi.mock("@/components/UserProvider", () => ({
+  useAuthActions: () => ({ logIn: mockLogIn, signUp: mockSignUp, logOut: vi.fn() }),
 }))
 
 // component imports
@@ -25,21 +22,23 @@ import AuthForm from "@/components/AuthForm"
 describe("AuthForm", () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockSignIn.mockResolvedValue({})
-    mockSignUp.mockResolvedValue({})
+    mockLogIn.mockResolvedValue(undefined)
+    mockSignUp.mockResolvedValue(undefined)
   })
 
   it("renders the login fields, button and signup link", () => {
     render(<AuthForm mode="login" />)
     expect(screen.getByLabelText("Email")).toBeInTheDocument()
     expect(screen.getByLabelText("Password")).toBeInTheDocument()
+    expect(screen.queryByLabelText("Code name")).not.toBeInTheDocument()
     expect(screen.queryByLabelText("Confirm password")).not.toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Log in" })).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Sign up" })).toHaveAttribute("href", "/signup")
   })
 
-  it("renders the confirm field, button and login link in signup mode", () => {
+  it("renders the code name, confirm field, button and login link in signup mode", () => {
     render(<AuthForm mode="signup" />)
+    expect(screen.getByLabelText("Code name")).toBeInTheDocument()
     expect(screen.getByLabelText("Confirm password")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Sign up" })).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Log in" })).toHaveAttribute("href", "/login")
@@ -56,7 +55,7 @@ describe("AuthForm", () => {
 
     await user.click(screen.getByRole("button", { name: "Hide password" }))
     expect(password).toHaveAttribute("type", "password")
-    expect(mockSignIn).not.toHaveBeenCalled()
+    expect(mockLogIn).not.toHaveBeenCalled()
   })
 
   it("toggles both password fields in signup mode", async () => {
@@ -73,12 +72,12 @@ describe("AuthForm", () => {
     await user.type(screen.getByLabelText("Email"), "  Name@Example.COM ")
     await user.type(screen.getByLabelText("Password"), "secret1")
     await user.click(screen.getByRole("button", { name: "Log in" }))
-    expect(mockSignIn).toHaveBeenCalledWith({ name: "test-auth" }, "name@example.com", "secret1")
+    expect(mockLogIn).toHaveBeenCalledWith("name@example.com", "secret1")
     expect(mockPush).toHaveBeenCalledWith("/heists")
   })
 
   it("shows an error and stays put when login fails", async () => {
-    mockSignIn.mockRejectedValue({ code: "auth/invalid-credential" })
+    mockLogIn.mockRejectedValue({ code: "auth/invalid-credential" })
     const user = userEvent.setup()
     render(<AuthForm mode="login" />)
     await user.type(screen.getByLabelText("Email"), "a@b.com")
@@ -88,9 +87,34 @@ describe("AuthForm", () => {
     expect(mockPush).not.toHaveBeenCalled()
   })
 
+  it("blocks signup when the code name is blank", async () => {
+    const user = userEvent.setup()
+    render(<AuthForm mode="signup" />)
+    await user.type(screen.getByLabelText("Code name"), "   ")
+    await user.type(screen.getByLabelText("Email"), "a@b.com")
+    await user.type(screen.getByLabelText("Password"), "secret1")
+    await user.type(screen.getByLabelText("Confirm password"), "secret1")
+    await user.click(screen.getByRole("button", { name: "Sign up" }))
+    expect(screen.getByRole("alert")).toHaveTextContent("Please enter a code name")
+    expect(mockSignUp).not.toHaveBeenCalled()
+  })
+
+  it("blocks signup when the code name is longer than 30 characters", async () => {
+    const user = userEvent.setup()
+    render(<AuthForm mode="signup" />)
+    await user.type(screen.getByLabelText("Code name"), "x".repeat(31))
+    await user.type(screen.getByLabelText("Email"), "a@b.com")
+    await user.type(screen.getByLabelText("Password"), "secret1")
+    await user.type(screen.getByLabelText("Confirm password"), "secret1")
+    await user.click(screen.getByRole("button", { name: "Sign up" }))
+    expect(screen.getByRole("alert")).toHaveTextContent("Code name must be 30 characters or fewer")
+    expect(mockSignUp).not.toHaveBeenCalled()
+  })
+
   it("blocks signup when the passwords do not match", async () => {
     const user = userEvent.setup()
     render(<AuthForm mode="signup" />)
+    await user.type(screen.getByLabelText("Code name"), "Silent Falcon")
     await user.type(screen.getByLabelText("Email"), "a@b.com")
     await user.type(screen.getByLabelText("Password"), "secret1")
     await user.type(screen.getByLabelText("Confirm password"), "secret2")
@@ -102,6 +126,7 @@ describe("AuthForm", () => {
   it("blocks signup when the password is shorter than 6 characters", async () => {
     const user = userEvent.setup()
     render(<AuthForm mode="signup" />)
+    await user.type(screen.getByLabelText("Code name"), "Silent Falcon")
     await user.type(screen.getByLabelText("Email"), "a@b.com")
     await user.type(screen.getByLabelText("Password"), "abc12")
     await user.type(screen.getByLabelText("Confirm password"), "abc12")
@@ -110,14 +135,15 @@ describe("AuthForm", () => {
     expect(mockSignUp).not.toHaveBeenCalled()
   })
 
-  it("creates the account and goes to /heists after a valid signup", async () => {
+  it("signs up with the trimmed code name and goes to /heists", async () => {
     const user = userEvent.setup()
     render(<AuthForm mode="signup" />)
+    await user.type(screen.getByLabelText("Code name"), "  Silent Falcon ")
     await user.type(screen.getByLabelText("Email"), "A@B.com")
     await user.type(screen.getByLabelText("Password"), "secret1")
     await user.type(screen.getByLabelText("Confirm password"), "secret1")
     await user.click(screen.getByRole("button", { name: "Sign up" }))
-    expect(mockSignUp).toHaveBeenCalledWith({ name: "test-auth" }, "a@b.com", "secret1")
+    expect(mockSignUp).toHaveBeenCalledWith("a@b.com", "secret1", "Silent Falcon")
     expect(mockPush).toHaveBeenCalledWith("/heists")
   })
 
@@ -125,6 +151,7 @@ describe("AuthForm", () => {
     mockSignUp.mockRejectedValue({ code: "auth/email-already-in-use" })
     const user = userEvent.setup()
     render(<AuthForm mode="signup" />)
+    await user.type(screen.getByLabelText("Code name"), "Silent Falcon")
     await user.type(screen.getByLabelText("Email"), "a@b.com")
     await user.type(screen.getByLabelText("Password"), "secret1")
     await user.type(screen.getByLabelText("Confirm password"), "secret1")

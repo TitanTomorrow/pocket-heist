@@ -1,5 +1,6 @@
 // components
 import Navbar from "@/components/Navbar"
+import RequireAuth from "@/components/RequireAuth"
 
 export default function HeistsLayout({
   children,
@@ -9,7 +10,9 @@ export default function HeistsLayout({
   return (
     <>
       <Navbar />
-      <main>{children}</main>
+      <main>
+        <RequireAuth>{children}</RequireAuth>
+      </main>
     </>
   )
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 // @ts-ignore Next.js handles global CSS imports at build time.
 import "@/app/globals.css"
+import UserProvider from "@/components/UserProvider"
 
 export const metadata: Metadata = {
   title: "Pocket Heist",
@@ -15,7 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+        <UserProvider>{children}</UserProvider>
       </body>
     </html>
   )

@@ -4,11 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff } from "lucide-react"
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from "firebase/auth"
-import { auth } from "@/lib/firebase"
+import { useAuthActions } from "@/components/UserProvider"
 import styles from "./AuthForm.module.css"
 
 type AuthMode = "login" | "signup"
@@ -18,6 +14,7 @@ interface AuthFormProps {
 }
 
 const MIN_PASSWORD_LENGTH = 6
+const MAX_CODE_NAME_LENGTH = 30
 
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
   "auth/invalid-credential": "Incorrect email or password",
@@ -36,7 +33,9 @@ function authErrorMessage(err: unknown) {
 export default function AuthForm({ mode }: AuthFormProps) {
   const isSignup = mode === "signup"
   const router = useRouter()
+  const { signUp, logIn } = useAuthActions()
 
+  const [codeName, setCodeName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -49,7 +48,18 @@ export default function AuthForm({ mode }: AuthFormProps) {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
+    const cleanCodeName = codeName.trim()
+
     if (isSignup) {
+      if (!cleanCodeName) {
+        setError("Please enter a code name")
+        return
+      }
+      // Count characters, not UTF-16 units, so an emoji counts as one
+      if ([...cleanCodeName].length > MAX_CODE_NAME_LENGTH) {
+        setError(`Code name must be ${MAX_CODE_NAME_LENGTH} characters or fewer`)
+        return
+      }
       if (password.length < MIN_PASSWORD_LENGTH) {
         setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters`)
         return
@@ -66,9 +76,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
     try {
       if (isSignup) {
-        await createUserWithEmailAndPassword(auth, cleanEmail, password)
+        await signUp(cleanEmail, password, cleanCodeName)
       } else {
-        await signInWithEmailAndPassword(auth, cleanEmail, password)
+        await logIn(cleanEmail, password)
       }
       router.push("/heists")
     } catch (err) {
@@ -79,6 +89,24 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
+      {isSignup && (
+        <div className={styles.field}>
+          <label htmlFor="signup-code-name" className={styles.label}>Code name</label>
+          <input
+            id="signup-code-name"
+            type="text"
+            autoComplete="nickname"
+            required
+            className={styles.input}
+            value={codeName}
+            onChange={(e) => {
+              setCodeName(e.target.value)
+              setError("")
+            }}
+          />
+        </div>
+      )}
+
       <div className={styles.field}>
         <label htmlFor={`${mode}-email`} className={styles.label}>Email</label>
         <input

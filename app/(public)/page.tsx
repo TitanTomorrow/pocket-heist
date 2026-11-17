@@ -3,10 +3,12 @@
 // when not logged in --> to /login
 
 import { Clock8 } from "lucide-react"
+import AuthRedirect from "@/components/AuthRedirect"
 
 export default function Home() {
   return (
     <div className="center-content">
+      <AuthRedirect signedInTo="/heists" signedOutTo="/login" />
       <div className="page-content">
         <h1>
           P<Clock8 className="logo" strokeWidth={2.75} />cket Heist
