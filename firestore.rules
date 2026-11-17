@@ -17,14 +17,45 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.uid == uid;
     }
 
-    // Per-user rule, disabled for now. Each user can only access their own
-    // heists, stored at personalData/pocket-heist/users/{uid}/heists/{heistId}.
-    // To switch over, uncomment this block and delete the development rule above.
-    //match /personalData/{appId}/users/{uid}/{collectionName}/{docId} {
-    //  allow get: if request.auth != null && request.auth.uid == uid;
-    //  allow list: if request.auth != null && request.auth.uid == uid
-    //    && request.query.limit <= 100;
-    //  allow write: if request.auth != null && request.auth.uid == uid;
-    //}
+    // Heists: top-level heists/{heistId}. Any signed-in user can read them;
+    // a heist's createdBy must be the uid of the user who created it, and only
+    // that user can change or delete it. Until the development rule above is
+    // deleted, it still allows any signed-in user to do anything here.
+    // Shape checks match types/firestore/heist.ts. The client picks the
+    // deadline at random, 24-72 hours (HEIST_MIN/MAX_DEADLINE_HOURS) after its
+    // own clock's time, while createdAt is the server's time; the 5 minute
+    // margin on each end absorbs the difference between the two clocks.
+    match /heists/{heistId} {
+      function isValidHeist(data) {
+        return data.keys().hasAll(['title', 'description', 'createdBy',
+            'createdByCodename', 'assignedTo', 'assignedCodename',
+            'createdAt', 'deadline', 'finalStatus'])
+          && data.title is string
+          && data.description is string
+          && data.createdByCodename is string
+          && data.assignedTo is string
+          && data.assignedCodename is string
+          && data.createdAt is timestamp
+          && data.deadline is timestamp
+          && data.deadline >= data.createdAt + duration.value(24 * 60 - 5, 'm')
+          && data.deadline <= data.createdAt + duration.value(72 * 60 + 5, 'm')
+          && data.finalStatus in ['active', 'success', 'failure'];
+      }
+
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && isValidHeist(request.resource.data);
+      allow update: if request.auth != null
+        && resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdByCodename == resource.data.createdByCodename
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.deadline == resource.data.deadline
+        && isValidHeist(request.resource.data);
+      allow delete: if request.auth != null
+        && resource.data.createdBy == request.auth.uid;
+    }
   }
 }
