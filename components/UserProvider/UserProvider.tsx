@@ -18,7 +18,8 @@ import {
   updateProfile,
   type User,
 } from "firebase/auth"
-import { auth } from "@/lib/firebase"
+import { doc, setDoc } from "firebase/firestore"
+import { auth, db } from "@/lib/firebase"
 
 // displayName holds the user's code name
 export interface AppUser {
@@ -71,8 +72,10 @@ export default function UserProvider({
       const { user: newUser } = await createUserWithEmailAndPassword(auth, email, password)
       try {
         await updateProfile(newUser, { displayName: codeName })
+        // Also store it in Firestore, where other users can look it up by uid
+        await setDoc(doc(db, "users", newUser.uid), { codeName })
       } catch (err) {
-        // Undo the signup so no account is left without a code name
+        // Undo the signup so no account is left without a saved code name
         try {
           await deleteUser(newUser)
         } catch {

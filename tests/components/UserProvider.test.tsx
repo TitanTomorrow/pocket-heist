@@ -11,9 +11,15 @@ const m = vi.hoisted(() => ({
   deleteUser: vi.fn(),
   signIn: vi.fn(),
   signOut: vi.fn(),
+  setDoc: vi.fn(),
 }))
 
-vi.mock("@/lib/firebase", () => ({ auth: { name: "test-auth" } }))
+vi.mock("@/lib/firebase", () => ({ auth: { name: "test-auth" }, db: { name: "test-db" } }))
+
+vi.mock("firebase/firestore", () => ({
+  doc: (db: unknown, ...path: string[]) => ({ db, path }),
+  setDoc: m.setDoc,
+}))
 
 vi.mock("firebase/auth", () => ({
   onAuthStateChanged: (_auth: unknown, callback: (user: FakeFirebaseUser | null) => void) => {
@@ -68,6 +74,7 @@ describe("UserProvider", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     m.authCallback = null
+    m.setDoc.mockResolvedValue(undefined)
   })
 
   it("starts as unknown, then becomes signed out or the user", () => {
@@ -120,6 +127,10 @@ describe("UserProvider", () => {
 
     expect(m.createUser).toHaveBeenCalledWith({ name: "test-auth" }, "a@b.com", "secret1")
     expect(m.updateProfile).toHaveBeenCalledWith(firebaseUser, { displayName: "Silent Falcon" })
+    expect(m.setDoc).toHaveBeenCalledWith(
+      { db: { name: "test-db" }, path: ["users", "u1"] },
+      { codeName: "Silent Falcon" },
+    )
     expect(screen.getByText("Silent Falcon (a@b.com)")).toBeInTheDocument()
     expect(seen).not.toContainEqual(expect.objectContaining({ displayName: null }))
   })
@@ -149,6 +160,38 @@ describe("UserProvider", () => {
     })
 
     expect(error).toEqual({ code: "auth/network-request-failed" })
+    expect(m.deleteUser).toHaveBeenCalledWith(firebaseUser)
+    expect(screen.getByText("signed out")).toBeInTheDocument()
+    expect(seen).not.toContainEqual(expect.objectContaining({ uid: "u1" }))
+  })
+
+  it("deletes the new account and rejects when the code name doc can't be saved", async () => {
+    const firebaseUser: FakeFirebaseUser = { uid: "u1", email: "a@b.com", displayName: null }
+    m.createUser.mockImplementation(async () => {
+      m.authCallback!(firebaseUser)
+      return { user: firebaseUser }
+    })
+    m.updateProfile.mockImplementation(async (user: FakeFirebaseUser, profile: { displayName: string }) => {
+      user.displayName = profile.displayName
+    })
+    m.setDoc.mockRejectedValue({ code: "permission-denied" })
+    m.deleteUser.mockImplementation(async () => {
+      m.authCallback!(null)
+    })
+
+    const { seen, actions } = renderWithProvider()
+    act(() => m.authCallback!(null))
+
+    let error: unknown
+    await act(async () => {
+      try {
+        await actions().signUp("a@b.com", "secret1", "Silent Falcon")
+      } catch (err) {
+        error = err
+      }
+    })
+
+    expect(error).toEqual({ code: "permission-denied" })
     expect(m.deleteUser).toHaveBeenCalledWith(firebaseUser)
     expect(screen.getByText("signed out")).toBeInTheDocument()
     expect(seen).not.toContainEqual(expect.objectContaining({ uid: "u1" }))

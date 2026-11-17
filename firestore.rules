@@ -10,6 +10,13 @@ service cloud.firestore {
         && request.time < timestamp.date(2027, 1, 1);
     }
 
+    // Code names: users/{uid} holds { codeName }. Any signed-in user can read
+    // them; only the owner can write their own.
+    match /users/{uid} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+
     // Per-user rule, disabled for now. Each user can only access their own
     // heists, stored at personalData/pocket-heist/users/{uid}/heists/{heistId}.
     // To switch over, uncomment this block and delete the development rule above.
