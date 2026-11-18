@@ -5,6 +5,7 @@ import Avatar from "@/components/Avatar"
 import Skeleton from "@/components/Skeleton"
 import AuthForm from "@/components/AuthForm"
 import Countdown from "@/components/Countdown"
+import CreateHeistForm from "@/components/CreateHeistForm"
 
 export default function PreviewPage() {
   return (
@@ -45,6 +46,14 @@ export default function PreviewPage() {
           <Countdown seconds={41 * 3600 + 12 * 60 + 8} />
           <Countdown seconds={65} />
           <Countdown seconds={0} />
+        </div>
+      </section>
+
+      <section>
+        <h3>CreateHeistForm (with AssigneeSelect)</h3>
+        <p>The assignee list reads the users collection, so it only fills in when you&apos;re signed in.</p>
+        <div className="preview-grid">
+          <CreateHeistForm />
         </div>
       </section>
     </div>

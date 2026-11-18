@@ -17,7 +17,7 @@ Pocket Heist is a starter project for the Claude Code Masterclass: a Next.js 16 
 
 - **Route groups split the app into two shells:**
   - `app/(public)/`: logged-out pages (splash `/`, `/login`, `/signup`, `/preview`). Its layout wraps pages in `<main className="public">` with no navbar.
-  - `app/(dashboard)/`: logged-in pages under `/heists` (list, `create`, `[id]` detail). Its layout renders `<Navbar />` above `<main>`.
+  - `app/(dashboard)/`: logged-in pages under `/heists` (list, `create`, `[id]` detail, `[id]/edit` reassignment). Its layout renders `<Navbar />` above `<main>`.
 - **Splash routing:** the `/` splash page redirects logged-in users to `/heists` (via `<AuthRedirect signedInTo="/heists" />`). Logged-out users stay on the splash, which links to `/signup` (Register) and `/login`; it must not auto-redirect them.
 - **`/preview`** is a component showcase. When adding a component, add a labelled section for it to `app/(public)/preview/page.tsx` (layout helpers: `.preview-grid`, `.preview-row`).
 - **Components** live in `components/<Name>/` with `<Name>.tsx`, a co-located `<Name>.module.css`, and an `index.ts` that re-exports the default (`export { default } from "./<Name>"`). Import them as `@/components/<Name>`. `AuthForm` is one shared component driven by a `mode: "login" | "signup"` prop rather than two separate forms.

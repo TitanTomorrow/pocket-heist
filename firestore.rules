@@ -17,21 +17,30 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.uid == uid;
     }
 
-    // Heists: top-level heists/{heistId}. Any signed-in user can read them;
-    // a heist's createdBy must be the uid of the user who created it, and only
-    // that user can change or delete it. Until the development rule above is
-    // deleted, it still allows any signed-in user to do anything here.
-    // Shape checks match types/firestore/heist.ts. The client picks the
-    // deadline at random, 24-72 hours (HEIST_MIN/MAX_DEADLINE_HOURS) after its
-    // own clock's time, while createdAt is the server's time; the 5 minute
-    // margin on each end absorbs the difference between the two clocks.
+    // Heists: top-level heists/{heistId}. Any signed-in user can read them.
+    // A heist's createdBy must be the uid of the user who created it, and it
+    // can't be assigned to them. The creator can change or delete it; the
+    // current assignee can only reassign it. Either may reassign it to someone
+    // new while it's active and before its deadline. Until the development
+    // rule above is deleted, it still allows any signed-in user to do anything
+    // here.
+    // Shape checks match types/firestore/heist.ts, including the title and
+    // description limits (HEIST_TITLE_MAX_LENGTH, HEIST_DESCRIPTION_MAX_LENGTH).
+    // The client picks the deadline at random, 24-72 hours
+    // (HEIST_MIN/MAX_DEADLINE_HOURS) after its own clock's time, while
+    // createdAt is the server's time; the 5 minute margin on each end absorbs
+    // the difference between the two clocks.
     match /heists/{heistId} {
       function isValidHeist(data) {
         return data.keys().hasAll(['title', 'description', 'createdBy',
             'createdByCodename', 'assignedTo', 'assignedCodename',
             'createdAt', 'deadline', 'finalStatus'])
           && data.title is string
+          && data.title.size() >= 1
+          && data.title.size() <= 60
           && data.description is string
+          && data.description.size() >= 1
+          && data.description.size() <= 500
           && data.createdByCodename is string
           && data.assignedTo is string
           && data.assignedCodename is string
@@ -42,18 +51,49 @@ service cloud.firestore {
           && data.finalStatus in ['active', 'success', 'failure'];
       }
 
+      // Fields that never change after creation
+      function keepsFixedFields() {
+        return request.resource.data.createdBy == resource.data.createdBy
+          && request.resource.data.createdByCodename == resource.data.createdByCodename
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.deadline == resource.data.deadline;
+      }
+
+      function changesAssignee() {
+        return request.resource.data.assignedTo != resource.data.assignedTo
+          || request.resource.data.assignedCodename != resource.data.assignedCodename;
+      }
+
+      // A reassignment: the heist is still open, and goes to someone new who
+      // isn't the person reassigning it. An assignee may hand it back to its
+      // creator.
+      function isValidReassignment() {
+        return resource.data.finalStatus == 'active'
+          && request.time < resource.data.deadline
+          && request.resource.data.assignedTo != resource.data.assignedTo
+          && request.resource.data.assignedTo != request.auth.uid;
+      }
+
       allow read: if request.auth != null;
       allow create: if request.auth != null
         && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.assignedTo != request.auth.uid
         && request.resource.data.createdAt == request.time
         && isValidHeist(request.resource.data);
       allow update: if request.auth != null
-        && resource.data.createdBy == request.auth.uid
-        && request.resource.data.createdBy == resource.data.createdBy
-        && request.resource.data.createdByCodename == resource.data.createdByCodename
-        && request.resource.data.createdAt == resource.data.createdAt
-        && request.resource.data.deadline == resource.data.deadline
-        && isValidHeist(request.resource.data);
+        && isValidHeist(request.resource.data)
+        && (
+          // The creator: any change except the fixed fields; a change of
+          // assignee must be a valid reassignment
+          (resource.data.createdBy == request.auth.uid
+            && keepsFixedFields()
+            && (!changesAssignee() || isValidReassignment()))
+          // The current assignee: only reassigning, nothing else
+          || (resource.data.assignedTo == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['assignedTo', 'assignedCodename'])
+            && isValidReassignment())
+        );
       allow delete: if request.auth != null
         && resource.data.createdBy == request.auth.uid;
     }

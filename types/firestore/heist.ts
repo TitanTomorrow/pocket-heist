@@ -15,6 +15,11 @@ export type HeistStatus = (typeof HEIST_STATUSES)[number]
 export const HEIST_MIN_DEADLINE_HOURS = 24
 export const HEIST_MAX_DEADLINE_HOURS = 72
 
+// Longest title and description, in characters. firestore.rules enforces the
+// same limits (and that neither is blank), so keep the two in sync.
+export const HEIST_TITLE_MAX_LENGTH = 60
+export const HEIST_DESCRIPTION_MAX_LENGTH = 500
+
 // Document: what you read from Firestore (after conversion)
 export interface Heist {
   id: string

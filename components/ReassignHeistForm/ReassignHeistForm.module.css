@@ -1,0 +1,48 @@
+@reference "../../app/globals.css";
+
+.form {
+  @apply mx-auto mt-6 flex w-full max-w-md flex-col gap-4;
+}
+.form button:disabled {
+  @apply cursor-not-allowed opacity-60;
+}
+
+.heist {
+  @apply rounded-xl border border-lighter bg-light p-5;
+}
+
+.title {
+  @apply text-lg font-bold break-words;
+}
+
+.description {
+  @apply mt-2 whitespace-pre-line break-words;
+}
+
+.facts {
+  @apply mt-4 grid grid-cols-2 gap-4;
+}
+.facts dt {
+  @apply text-sm;
+}
+.facts dd {
+  @apply mt-0.5 truncate font-semibold text-heading;
+}
+
+.error {
+  @apply text-sm text-error;
+}
+
+.message {
+  @apply mx-auto mt-6 flex max-w-md flex-col items-center gap-3 text-center;
+}
+
+.link {
+  @apply font-semibold text-primary;
+}
+.link:hover {
+  @apply text-secondary;
+}
+.link:focus-visible {
+  @apply rounded-sm outline-2 outline-offset-2 outline-secondary;
+}

@@ -1,0 +1,37 @@
+@reference "../../app/globals.css";
+
+.field {
+  @apply flex flex-col gap-1;
+}
+
+.label {
+  @apply text-sm font-medium text-heading;
+}
+
+.select {
+  @apply w-full truncate rounded-lg border border-lighter bg-light px-3 py-2 text-heading;
+}
+.select:disabled {
+  @apply cursor-not-allowed text-body;
+}
+.select:focus-visible {
+  @apply outline-2 outline-offset-1 outline-primary;
+}
+
+.errorRow {
+  @apply flex items-center justify-between gap-3;
+}
+
+.error {
+  @apply text-sm text-error;
+}
+
+.retry {
+  @apply shrink-0 text-sm font-semibold text-primary;
+}
+.retry:hover {
+  @apply text-secondary;
+}
+.retry:focus-visible {
+  @apply rounded-sm outline-2 outline-offset-2 outline-secondary;
+}

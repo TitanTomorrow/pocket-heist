@@ -1,0 +1,39 @@
+@reference "../../app/globals.css";
+
+.form {
+  @apply mx-auto mt-6 flex w-full max-w-md flex-col gap-4;
+}
+
+.field {
+  @apply flex flex-col gap-1;
+}
+
+.label {
+  @apply text-sm font-medium text-heading;
+}
+
+.input {
+  @apply w-full rounded-lg border border-lighter bg-light px-3 py-2 text-heading;
+}
+.input:focus-visible {
+  @apply outline-2 outline-offset-1 outline-primary;
+}
+.input[aria-invalid="true"] {
+  @apply border-error;
+}
+
+textarea.input {
+  @apply resize-y;
+}
+
+.note {
+  @apply text-sm;
+}
+
+.error {
+  @apply text-sm text-error;
+}
+
+.form button:disabled {
+  @apply cursor-not-allowed opacity-60;
+}
