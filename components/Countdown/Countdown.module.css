@@ -1,0 +1,5 @@
+@reference "../../app/globals.css";
+
+.countdown {
+  @apply tabular-nums;
+}

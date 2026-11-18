@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { Big_Shoulders_Stencil, Inter } from "next/font/google"
 // @ts-ignore Next.js handles global CSS imports at build time.
 import "@/app/globals.css"
 import UserProvider from "@/components/UserProvider"
@@ -8,13 +9,22 @@ export const metadata: Metadata = {
   description: "Steal the stapler. Keep your job.",
 }
 
+// Self-hosted by next/font; globals.css maps these variables to font-sans and font-stencil
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
+const stencil = Big_Shoulders_Stencil({
+  subsets: ["latin"],
+  weight: "800",
+  variable: "--font-big-shoulders-stencil",
+  display: "swap",
+})
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${stencil.variable}`}>
       <body>
         <UserProvider>{children}</UserProvider>
       </body>

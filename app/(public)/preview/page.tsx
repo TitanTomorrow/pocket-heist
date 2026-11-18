@@ -4,6 +4,7 @@
 import Avatar from "@/components/Avatar"
 import Skeleton from "@/components/Skeleton"
 import AuthForm from "@/components/AuthForm"
+import Countdown from "@/components/Countdown"
 
 export default function PreviewPage() {
   return (
@@ -35,6 +36,15 @@ export default function PreviewPage() {
         <div className="preview-grid">
           <AuthForm mode="login" />
           <AuthForm mode="signup" />
+        </div>
+      </section>
+
+      <section>
+        <h3>Countdown</h3>
+        <div className="preview-row">
+          <Countdown seconds={41 * 3600 + 12 * 60 + 8} />
+          <Countdown seconds={65} />
+          <Countdown seconds={0} />
         </div>
       </section>
     </div>

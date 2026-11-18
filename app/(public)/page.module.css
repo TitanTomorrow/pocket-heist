@@ -1,0 +1,90 @@
+@reference "../globals.css";
+
+/* Rules are scoped under .splash so they outrank `.public h1` in globals.css */
+
+.splash {
+  @apply mx-auto grid min-h-lvh max-w-6xl content-center gap-14 px-4 py-12;
+  @apply sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:gap-16;
+}
+
+/* left column: brand, headline, pitch, actions */
+
+.splash .logo {
+  @apply flex items-baseline text-lg font-bold text-heading;
+}
+.splash .logo :global(svg.logo) {
+  @apply mx-px size-[0.8em] self-center text-primary;
+}
+
+.splash .headline {
+  @apply mt-6 font-stencil font-extrabold uppercase text-heading;
+  font-size: clamp(3.25rem, 11vw, 7.5rem);
+  line-height: 0.9;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+
+.splash .intro {
+  @apply mt-8 max-w-[34rem] text-lg leading-relaxed;
+}
+
+.splash .actions {
+  @apply mt-10 flex flex-wrap items-center gap-x-6 gap-y-4;
+}
+.splash .actions .register {
+  @apply px-7 py-3 text-lg;
+}
+.splash .login {
+  @apply text-base;
+}
+.splash .login a {
+  @apply font-semibold text-primary underline-offset-4;
+}
+.splash .login a:hover {
+  @apply text-secondary underline;
+}
+.splash .login a:focus-visible {
+  @apply rounded-sm outline-2 outline-offset-2 outline-secondary;
+}
+
+/* right column: an example heist */
+
+.splash .example {
+  @apply w-full max-w-md justify-self-center lg:justify-self-end;
+}
+
+.splash .ticket {
+  @apply rounded-2xl border border-lighter bg-light p-6 sm:p-8;
+}
+
+.splash .ticketTitle {
+  @apply text-2xl font-bold;
+}
+
+.splash .ticketBody {
+  @apply mt-3 leading-relaxed;
+}
+
+.splash .facts {
+  @apply mt-6 grid grid-cols-2 gap-4;
+}
+.splash .facts dt {
+  @apply text-sm;
+}
+.splash .facts dd {
+  @apply mt-0.5 font-semibold text-heading;
+}
+
+.splash .timeLeft {
+  @apply mt-7 flex items-end justify-between gap-4 border-t-2 border-dashed border-lighter pt-6;
+}
+.splash .timeLeft span {
+  @apply pb-2 text-sm;
+}
+.splash .digits {
+  @apply font-stencil text-6xl leading-none font-extrabold text-primary;
+}
+
+.splash .caption {
+  @apply mt-4 text-center text-sm;
+}
