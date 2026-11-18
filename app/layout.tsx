@@ -11,11 +11,16 @@ export const metadata: Metadata = {
 
 // Self-hosted by next/font; globals.css maps these variables to font-sans and font-stencil
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
+// next/font has no metrics for this font, so its size-adjusted fallback is
+// turned off (which silences the build warning) and a condensed system font
+// stands in while it loads
 const stencil = Big_Shoulders_Stencil({
   subsets: ["latin"],
   weight: "800",
   variable: "--font-big-shoulders-stencil",
   display: "swap",
+  adjustFontFallback: false,
+  fallback: ["Impact", "Arial Narrow", "sans-serif"],
 })
 
 export default function RootLayout({
