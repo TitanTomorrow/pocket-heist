@@ -1,3 +1,4 @@
+import { Profiler } from "react"
 import { render, screen, act } from "@testing-library/react"
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 
@@ -55,6 +56,49 @@ describe("Countdown", () => {
     rerender(<Countdown seconds={120} />)
 
     expect(screen.getByText("00:02:00")).toBeInTheDocument()
+  })
+
+  it("stops its timer once it reaches zero", () => {
+    render(<Countdown seconds={2} />)
+    act(() => {
+      vi.advanceTimersByTime(3000)
+    })
+    expect(screen.getByText("00:00:00")).toBeInTheDocument()
+    expect(vi.getTimerCount()).toBe(0)
+  })
+
+  it("tells the parent once when time runs out", () => {
+    const onExpire = vi.fn()
+    render(<Countdown seconds={2} onExpire={onExpire} />)
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+    expect(onExpire).not.toHaveBeenCalled()
+    act(() => {
+      vi.advanceTimersByTime(5000)
+    })
+    expect(onExpire).toHaveBeenCalledTimes(1)
+  })
+
+  it("doesn't start a timer when there's no time left", () => {
+    const onExpire = vi.fn()
+    render(<Countdown seconds={0} onExpire={onExpire} />)
+    expect(vi.getTimerCount()).toBe(0)
+    expect(onExpire).toHaveBeenCalledTimes(1)
+  })
+
+  it("doesn't re-render when the time shown hasn't changed", () => {
+    const onRender = vi.fn()
+    render(
+      <Profiler id="countdown" onRender={onRender}>
+        <Countdown seconds={61} />
+      </Profiler>,
+    )
+    expect(onRender).toHaveBeenCalledTimes(1)
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+    expect(onRender).toHaveBeenCalledTimes(2)
   })
 
   it("uses elapsed wall time when the browser delays an interval", () => {

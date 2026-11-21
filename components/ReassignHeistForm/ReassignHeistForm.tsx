@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { flushSync } from "react-dom"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import AssigneeSelect from "@/components/AssigneeSelect"
@@ -34,8 +35,12 @@ export default function ReassignHeistForm({ heistId }: ReassignHeistFormProps) {
 
   const [loaded, setLoaded] = useState<Loaded>({ status: "loading" })
   const [assignee, setAssignee] = useState<CrewMember | null>(null)
+  const [assigneeError, setAssigneeError] = useState("")
   const [error, setError] = useState("")
   const [submitting, setSubmitting] = useState(false)
+  // Set when the countdown runs out while the form is open
+  const [timedOut, setTimedOut] = useState(false)
+  const assigneeRef = useRef<HTMLSelectElement>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -64,12 +69,21 @@ export default function ReassignHeistForm({ heistId }: ReassignHeistFormProps) {
   const { heist, loadedAt } = loaded
   if (!heist) return <Message>There&apos;s no heist with that id.</Message>
 
+  // An alert when time runs out mid-edit, because the form vanishes under the user
+  if (timedOut) return <Message role="alert">{BLOCKED_MESSAGES.closed}</Message>
   const blocker = user ? reassignBlocker(heist, user.uid, new Date(loadedAt)) : "not-allowed"
   if (blocker) return <Message>{BLOCKED_MESSAGES[blocker]}</Message>
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    if (!heist || !assignee || submitting) return
+    if (!heist || submitting) return
+    // Checked here rather than by disabling the button, which keyboard and
+    // screen reader users can't reach to find out what's missing
+    if (!assignee) {
+      flushSync(() => setAssigneeError("Choose a crew member to hand this heist to"))
+      assigneeRef.current?.focus()
+      return
+    }
 
     setSubmitting(true)
     setError("")
@@ -83,7 +97,7 @@ export default function ReassignHeistForm({ heistId }: ReassignHeistFormProps) {
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
+    <form className={styles.form} onSubmit={handleSubmit} noValidate>
       <article className={styles.heist}>
         <h3 className={styles.title}>{heist.title}</h3>
         <p className={styles.description}>{heist.description}</p>
@@ -95,7 +109,10 @@ export default function ReassignHeistForm({ heistId }: ReassignHeistFormProps) {
           <div>
             <dt>Time left</dt>
             <dd>
-              <Countdown seconds={(heist.deadline.getTime() - loadedAt) / 1000} />
+              <Countdown
+                seconds={(heist.deadline.getTime() - loadedAt) / 1000}
+                onExpire={() => setTimedOut(true)}
+              />
             </dd>
           </div>
         </dl>
@@ -103,14 +120,19 @@ export default function ReassignHeistForm({ heistId }: ReassignHeistFormProps) {
 
       <AssigneeSelect
         id="reassign-assignee"
+        ref={assigneeRef}
         value={assignee?.uid ?? ""}
-        onChange={setAssignee}
+        onChange={(member) => {
+          setAssignee(member)
+          setAssigneeError("")
+        }}
         exclude={[heist.assignedTo, user?.uid ?? ""]}
+        error={assigneeError || undefined}
       />
 
       {error && <p role="alert" className={styles.error}>{error}</p>}
 
-      <button type="submit" className="btn" disabled={!assignee || submitting}>
+      <button type="submit" className="btn" disabled={submitting}>
         {submitting ? "Reassigning…" : "Reassign heist"}
       </button>
     </form>

@@ -50,9 +50,16 @@ describe("HeistCard", () => {
     expect(screen.queryByText("Overdue")).not.toBeInTheDocument()
   })
 
+  it("labels the deadline and the time left for screen readers", () => {
+    render(<HeistCard heist={heist()} now={twoHoursBefore} />)
+    expect(screen.getByText("Due")).toHaveClass("sr-only")
+    expect(screen.getByText("Time left")).toHaveClass("sr-only")
+  })
+
   it("shows Overdue instead of a countdown once the deadline has passed", () => {
     render(<HeistCard heist={heist()} now={deadline.getTime() + HOUR} />)
     expect(screen.getByText("Overdue")).toBeInTheDocument()
+    expect(screen.queryByText("Time left")).not.toBeInTheDocument()
     expect(screen.queryByText(/^\d{2}:\d{2}:\d{2}$/)).not.toBeInTheDocument()
   })
 

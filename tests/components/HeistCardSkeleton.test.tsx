@@ -5,11 +5,11 @@ import { describe, it, expect } from "vitest"
 import HeistCardSkeleton from "@/components/HeistCardSkeleton"
 
 describe("HeistCardSkeleton", () => {
-  it("announces loading once however many placeholders it shows", () => {
-    render(<HeistCardSkeleton count={3} />)
-    // aria-busy would hold back the announcement, and it is never cleared
-    expect(screen.getByRole("status")).not.toHaveAttribute("aria-busy")
-    expect(screen.getAllByText("Loading...")).toHaveLength(1)
+  it("is hidden from screen readers, since the page announces loading itself", () => {
+    const { container } = render(<HeistCardSkeleton count={3} />)
+    expect(container.firstChild).toHaveAttribute("aria-hidden", "true")
+    expect(screen.queryByRole("status", { hidden: true })).not.toBeInTheDocument()
+    expect(screen.queryByText("Loading...")).not.toBeInTheDocument()
     expect(screen.getAllByTestId("heist-card-skeleton")).toHaveLength(3)
   })
 

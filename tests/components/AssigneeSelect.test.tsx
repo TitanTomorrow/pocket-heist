@@ -1,3 +1,4 @@
+import { createRef } from "react"
 import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, it, expect, vi, beforeEach } from "vitest"
@@ -32,6 +33,25 @@ function deferred<T>() {
 describe("AssigneeSelect", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+  })
+
+  it("shows a validation error, linked to the select and announced", async () => {
+    m.listCrew.mockResolvedValue(crew)
+    render(<AssigneeSelect id="a" value="" onChange={vi.fn()} exclude={[]} error="Choose a crew member" />)
+    const select = screen.getByLabelText("Assign to")
+    // aria-invalid rather than toBeInvalid: an empty required select is natively invalid anyway
+    expect(select).toHaveAttribute("aria-invalid", "true")
+    expect(select).toHaveAccessibleDescription("Choose a crew member")
+    expect(screen.getByRole("alert")).toHaveTextContent("Choose a crew member")
+    await screen.findByRole("option", { name: "Ash Badger" })
+  })
+
+  it("passes its ref to the select, so a form can focus it", async () => {
+    m.listCrew.mockResolvedValue(crew)
+    const ref = createRef<HTMLSelectElement>()
+    render(<AssigneeSelect id="a" value="" onChange={vi.fn()} exclude={[]} ref={ref} />)
+    expect(ref.current).toBe(screen.getByLabelText("Assign to"))
+    await screen.findByRole("option", { name: "Ash Badger" })
   })
 
   it("shows a disabled loading state while the crew loads", () => {

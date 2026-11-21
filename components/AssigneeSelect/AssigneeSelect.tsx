@@ -9,6 +9,8 @@ interface AssigneeSelectProps {
   value: string // the chosen member's uid, or "" for none
   onChange: (member: CrewMember | null) => void
   exclude: string[] // uids to leave out, e.g. the signed-in user
+  error?: string // validation message from the form, e.g. when no one is chosen
+  ref?: React.Ref<HTMLSelectElement> // lets the form focus the select
 }
 
 type Status = "loading" | "ready" | "error"
@@ -17,7 +19,7 @@ type Status = "loading" | "ready" | "error"
 // Code names aren't unique, and that is deliberate: two members can show up with
 // the same name and the planner may pick the wrong one. It's part of the mischief,
 // so don't add uids or emails to tell them apart.
-export default function AssigneeSelect({ id, value, onChange, exclude }: AssigneeSelectProps) {
+export default function AssigneeSelect({ id, value, onChange, exclude, error, ref }: AssigneeSelectProps) {
   const [crew, setCrew] = useState<CrewMember[]>([])
   const [status, setStatus] = useState<Status>("loading")
   const [attempt, setAttempt] = useState(0)
@@ -51,12 +53,17 @@ export default function AssigneeSelect({ id, value, onChange, exclude }: Assigne
   else if (status === "error") placeholder = "Crew unavailable"
   else if (options.length === 0) placeholder = "No one else has signed up yet"
 
+  const errorId = `${id}-error`
+
   return (
     <div className={styles.field}>
       <label htmlFor={id} className={styles.label}>Assign to</label>
       <select
         id={id}
+        ref={ref}
         required
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? errorId : undefined}
         disabled={!ready}
         className={styles.select}
         value={ready ? value : ""}
@@ -67,6 +74,7 @@ export default function AssigneeSelect({ id, value, onChange, exclude }: Assigne
           <option key={member.uid} value={member.uid}>{member.codeName}</option>
         ))}
       </select>
+      {error && <p id={errorId} role="alert" className={styles.error}>{error}</p>}
       {status === "error" && (
         <div className={styles.errorRow}>
           <p role="alert" className={styles.error}>Couldn&apos;t load the crew.</p>

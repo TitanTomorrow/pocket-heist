@@ -27,16 +27,18 @@ function heist(id: string, overrides: Partial<Heist> = {}): Heist {
 const base = { loading: false, error: null, now }
 
 describe("HeistList", () => {
-  it("shows three card placeholders under one status while open heists load", () => {
+  // The page announces loading once for all its lists, so the placeholders stay silent
+  it("shows three silent card placeholders while open heists load", () => {
     render(<HeistList view="active" heists={[]} {...base} loading />)
-    expect(screen.getAllByRole("status")).toHaveLength(1)
+    expect(screen.queryByRole("status", { hidden: true })).not.toBeInTheDocument()
     expect(screen.getAllByTestId("heist-card-skeleton")).toHaveLength(3)
     expect(screen.queryByRole("list")).not.toBeInTheDocument()
   })
 
-  it("keeps the plain loading placeholder for expired heists", () => {
-    render(<HeistList view="expired" heists={[]} {...base} loading />)
-    expect(screen.getByRole("status")).toBeInTheDocument()
+  it("keeps the plain, silent loading placeholder for expired heists", () => {
+    const { container } = render(<HeistList view="expired" heists={[]} {...base} loading />)
+    expect(container.firstChild).toHaveAttribute("aria-hidden", "true")
+    expect(screen.queryByRole("status", { hidden: true })).not.toBeInTheDocument()
     expect(screen.queryByTestId("heist-card-skeleton")).not.toBeInTheDocument()
   })
 

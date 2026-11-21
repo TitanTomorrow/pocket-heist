@@ -52,11 +52,25 @@ describe("HeistsPage", () => {
     expect(headings).toEqual(["Your Active Heists", "Heists You've Assigned", "Your Expired Heists"])
   })
 
+  it("announces loading once for the whole page, then that the heists have loaded", () => {
+    const loading = { heists: [], loading: true, error: null, now }
+    m.results = { active: loading, assigned: ready([]), expired: ready([]) }
+    const { rerender } = render(<HeistsPage />)
+    const status = screen.getByRole("status")
+    expect(status).toHaveTextContent("Loading heists…")
+
+    m.results.active = ready([])
+    rerender(<HeistsPage />)
+    // the same region, so the change is announced
+    expect(screen.getByRole("status")).toBe(status)
+    expect(status).toHaveTextContent("Heists loaded")
+  })
+
   it("shows a loading placeholder for each section still loading", () => {
     const loading = { heists: [], loading: true, error: null, now }
     m.results = { active: loading, assigned: loading, expired: loading }
     render(<HeistsPage />)
-    expect(screen.getAllByRole("status")).toHaveLength(3)
+    expect(screen.getAllByRole("status")).toHaveLength(1)
     expect(within(section("Your Active Heists")).getAllByTestId("heist-card-skeleton")).toHaveLength(3)
     expect(within(section("Heists You've Assigned")).getAllByTestId("heist-card-skeleton")).toHaveLength(3)
     expect(within(section("Your Expired Heists")).queryByTestId("heist-card-skeleton")).not.toBeInTheDocument()

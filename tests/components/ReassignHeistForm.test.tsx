@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { act, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import type { Heist } from "@/types/firestore"
@@ -122,6 +122,36 @@ describe("ReassignHeistForm", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Couldn't reassign the heist")
     expect(screen.getByLabelText("Assign to")).toHaveValue("u3")
     expect(m.push).not.toHaveBeenCalled()
+  })
+
+  it("asks for a new assignee when submitted without one", async () => {
+    const user = userEvent.setup()
+    render(<ReassignHeistForm heistId="h1" />)
+    await screen.findByRole("option", { name: "Ash Badger" })
+    const button = screen.getByRole("button", { name: "Reassign heist" })
+    expect(button).toBeEnabled()
+    await user.click(button)
+    const select = screen.getByLabelText("Assign to")
+    expect(select).toHaveFocus()
+    expect(select).toHaveAccessibleDescription("Choose a crew member to hand this heist to")
+    expect(m.reassignHeist).not.toHaveBeenCalled()
+  })
+
+  it("closes the form when the heist runs out of time while it's open", async () => {
+    // fake only the clock and intervals, so promises and findBy still run
+    vi.useFakeTimers({ toFake: ["Date", "setInterval", "clearInterval"] })
+    try {
+      m.getHeist.mockResolvedValue(makeHeist({ deadline: new Date(Date.now() + 2000) }))
+      render(<ReassignHeistForm heistId="h1" />)
+      await screen.findByRole("option", { name: "Ash Badger" })
+      act(() => {
+        vi.advanceTimersByTime(3000)
+      })
+      expect(screen.getByRole("alert")).toHaveTextContent(/can't be reassigned/i)
+      expect(screen.queryByLabelText("Assign to")).not.toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it("says so when there is no heist with that id", async () => {

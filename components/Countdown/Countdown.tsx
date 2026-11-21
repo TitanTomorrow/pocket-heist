@@ -1,44 +1,48 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useEffectEvent, useState } from "react"
 import styles from "./Countdown.module.css"
 
 interface CountdownProps {
   seconds: number // time left when first shown
   className?: string
+  onExpire?: () => void // called once the countdown reaches zero
 }
 
 const pad = (n: number) => String(n).padStart(2, "0")
 
 // Ticks a remaining time down to zero, shown as HH:MM:SS
-export default function Countdown({ seconds, className }: CountdownProps) {
+export default function Countdown({ seconds, className, onExpire }: CountdownProps) {
   const [countdown, setCountdown] = useState(() => {
     const left = Math.max(0, Math.floor(seconds))
     return { seconds, left }
   })
-  const deadlineRef = useRef<number | null>(null)
 
   if (countdown.seconds !== seconds) {
     const left = Math.max(0, Math.floor(seconds))
     setCountdown({ seconds, left })
   }
 
-  useEffect(() => {
-    deadlineRef.current = Date.now() + Math.max(0, Math.floor(seconds)) * 1000
-  }, [seconds])
+  // Always calls the latest onExpire, without restarting the timer when it changes
+  const expire = useEffectEvent(() => onExpire?.())
 
   useEffect(() => {
-    const update = () => {
-      const deadline = deadlineRef.current
-      if (deadline === null) return
-      setCountdown((current) => ({
-        ...current,
-        left: Math.max(0, Math.ceil((deadline - Date.now()) / 1000)),
-      }))
+    // Measured against the clock, not counted in ticks, because browsers
+    // delay intervals in background tabs
+    const deadline = Date.now() + Math.max(0, Math.floor(seconds)) * 1000
+
+    const tick = () => {
+      const left = Math.max(0, Math.ceil((deadline - Date.now()) / 1000))
+      // Same object back when nothing changed, so React skips the re-render
+      setCountdown((current) => (current.left === left ? current : { ...current, left }))
+      if (left === 0) expire()
+      return left
     }
 
-    update()
-    const id = setInterval(update, 1000)
+    if (tick() === 0) return
+    const id = setInterval(() => {
+      if (tick() === 0) clearInterval(id)
+    }, 1000)
     return () => clearInterval(id)
   }, [seconds])
 

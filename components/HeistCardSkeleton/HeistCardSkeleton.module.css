@@ -41,7 +41,3 @@
 .barLong {
   @apply h-3 w-3/4 rounded bg-border;
 }
-
-.srOnly {
-  @apply sr-only;
-}

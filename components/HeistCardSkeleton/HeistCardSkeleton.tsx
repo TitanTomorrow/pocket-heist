@@ -4,13 +4,13 @@ interface HeistCardSkeletonProps {
   count?: number
 }
 
-// Card-shaped placeholders in the heist grid. One status for the lot, so
-// screen readers hear "Loading" once rather than once per placeholder
+// Card-shaped placeholders in the heist grid. Purely visual: the page
+// announces loading once in its own status region, rather than once per list
 export default function HeistCardSkeleton({ count = 1 }: HeistCardSkeletonProps) {
   return (
-    <div className="heist-grid" role="status">
+    <div className="heist-grid" aria-hidden="true">
       {Array.from({ length: count }, (_, i) => (
-        <div key={i} className={styles.card} aria-hidden="true" data-testid="heist-card-skeleton">
+        <div key={i} className={styles.card} data-testid="heist-card-skeleton">
           <div className={styles.title}>
             <div className={styles.titleLine} />
             <div className={styles.titleLineShort} />
@@ -31,7 +31,6 @@ export default function HeistCardSkeleton({ count = 1 }: HeistCardSkeletonProps)
           </div>
         </div>
       ))}
-      <span className={styles.srOnly}>Loading...</span>
     </div>
   )
 }

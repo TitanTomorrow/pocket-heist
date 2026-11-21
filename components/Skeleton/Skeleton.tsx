@@ -1,8 +1,17 @@
 import styles from "./Skeleton.module.css"
 
-export default function Skeleton() {
+interface SkeletonProps {
+  // true when something else (e.g. the page) already announces loading
+  decorative?: boolean
+}
+
+export default function Skeleton({ decorative = false }: SkeletonProps) {
   return (
-    <div className={styles.skeleton} role="status">
+    <div
+      className={styles.skeleton}
+      role={decorative ? undefined : "status"}
+      aria-hidden={decorative || undefined}
+    >
       <div className={styles.header}>
         <div className={styles.avatar} />
         <div className={styles.headerLines}>
@@ -15,7 +24,7 @@ export default function Skeleton() {
         <div className={`${styles.line} ${styles.lineFull}`} />
         <div className={`${styles.line} ${styles.lineShort}`} />
       </div>
-      <span className={styles.srOnly}>Loading...</span>
+      {!decorative && <span className={styles.srOnly}>Loading...</span>}
     </div>
   )
 }

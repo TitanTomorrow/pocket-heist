@@ -36,7 +36,8 @@ const SKELETON_CARDS = 3
 export default function HeistList({ view, heists, loading, error, now }: HeistListProps) {
   const expired = view === "expired"
 
-  if (loading) return expired ? <Skeleton /> : <HeistCardSkeleton count={SKELETON_CARDS} />
+  // Silent placeholders: the page announces loading once for all its lists
+  if (loading) return expired ? <Skeleton decorative /> : <HeistCardSkeleton count={SKELETON_CARDS} />
 
   if (error) return <p className={styles.error} role="alert">{error}</p>
 

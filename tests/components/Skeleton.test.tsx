@@ -19,4 +19,12 @@ describe("Skeleton", () => {
 
     expect(screen.getByText("Loading...")).toBeInTheDocument()
   })
+
+  it("can be purely visual when something else announces loading", () => {
+    const { container } = render(<Skeleton decorative />)
+
+    expect(container.firstChild).toHaveAttribute("aria-hidden", "true")
+    expect(screen.queryByRole("status", { hidden: true })).not.toBeInTheDocument()
+    expect(screen.queryByText("Loading...")).not.toBeInTheDocument()
+  })
 })

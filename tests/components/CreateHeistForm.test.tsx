@@ -71,10 +71,33 @@ describe("CreateHeistForm", () => {
     expect(screen.queryByRole("option", { name: "Silent Falcon" })).not.toBeInTheDocument()
   })
 
-  it("can't be submitted until an assignee is chosen", async () => {
+  // An enabled button that explains itself, rather than a disabled one keyboard users can't reach
+  it("asks for an assignee when submitted without one", async () => {
+    const user = userEvent.setup()
+    render(<CreateHeistForm />)
+    await user.click(screen.getByLabelText("Title"))
+    await user.paste("Title")
+    await user.click(screen.getByLabelText("Description"))
+    await user.paste("Description")
+    await screen.findByRole("option", { name: "Velvet Otter" })
+    const button = screen.getByRole("button", { name: "Create heist" })
+    expect(button).toBeEnabled()
+    await user.click(button)
+    const select = screen.getByLabelText("Assign to")
+    expect(select).toHaveFocus()
+    expect(select).toHaveAccessibleDescription("Choose a crew member to assign this heist to")
+    expect(m.createHeist).not.toHaveBeenCalled()
+  })
+
+  it("clears the assignee error once someone is chosen", async () => {
+    const user = userEvent.setup()
     render(<CreateHeistForm />)
     await screen.findByRole("option", { name: "Velvet Otter" })
-    expect(screen.getByRole("button", { name: "Create heist" })).toBeDisabled()
+    await user.click(screen.getByRole("button", { name: "Create heist" }))
+    // aria-invalid rather than toBeInvalid: an empty required select is natively invalid anyway
+    expect(screen.getByLabelText("Assign to")).toHaveAttribute("aria-invalid", "true")
+    await user.selectOptions(screen.getByLabelText("Assign to"), "u2")
+    expect(screen.getByLabelText("Assign to")).not.toHaveAttribute("aria-invalid", "true")
   })
 
   it("can't be submitted while signed out", async () => {

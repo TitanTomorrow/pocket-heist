@@ -35,13 +35,18 @@ export default function HeistCard({ heist, now }: HeistCardProps) {
           <span className={styles.by}>{heist.createdByCodename}</span>
         </p>
         <p className={styles.row}>
+          {/* The icon and bullet are hidden, so screen readers get words instead */}
           <Calendar size={12} className={styles.icon} aria-hidden="true" />
+          <span className="sr-only">Due </span>
           <LocalDeadline date={heist.deadline} />
           <span aria-hidden="true">•</span>
           {secondsLeft <= 0 ? (
             <span className={styles.timeLeft}>Overdue</span>
           ) : (
-            <Countdown seconds={secondsLeft} className={styles.timeLeft} />
+            <>
+              <span className="sr-only">Time left </span>
+              <Countdown seconds={secondsLeft} className={styles.timeLeft} />
+            </>
           )}
         </p>
       </div>

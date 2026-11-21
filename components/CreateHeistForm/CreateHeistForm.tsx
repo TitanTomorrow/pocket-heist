@@ -18,6 +18,7 @@ import styles from "./CreateHeistForm.module.css"
 interface FieldErrors {
   title?: string
   description?: string
+  assignee?: string
 }
 
 // Count characters, not UTF-16 units, so an emoji counts as one
@@ -48,21 +49,26 @@ export default function CreateHeistForm() {
   const [submitting, setSubmitting] = useState(false)
   const titleRef = useRef<HTMLInputElement>(null)
   const descriptionRef = useRef<HTMLTextAreaElement>(null)
+  const assigneeRef = useRef<HTMLSelectElement>(null)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    if (!user || !assignee || submitting) return
+    if (!user || submitting) return
 
     const cleanTitle = title.trim()
     const cleanDescription = description.trim()
     const errors = validate(cleanTitle, cleanDescription)
-    if (errors.title || errors.description) {
+    // Checked here rather than by disabling the button, which keyboard and
+    // screen reader users can't reach to find out what's missing
+    if (!assignee) errors.assignee = "Choose a crew member to assign this heist to"
+    if (errors.title || errors.description || !assignee) {
       // Render the errors first so the focused field is already linked to its
       // message. The messages are alerts too, because focusing a field that
       // already has focus (Enter in Title) announces nothing
       flushSync(() => setFieldErrors(errors))
       if (errors.title) titleRef.current?.focus()
-      else descriptionRef.current?.focus()
+      else if (errors.description) descriptionRef.current?.focus()
+      else assigneeRef.current?.focus()
       return
     }
     setFieldErrors({})
@@ -130,9 +136,14 @@ export default function CreateHeistForm() {
 
       <AssigneeSelect
         id="heist-assignee"
+        ref={assigneeRef}
         value={assignee?.uid ?? ""}
-        onChange={setAssignee}
+        onChange={(member) => {
+          setAssignee(member)
+          setFieldErrors((prev) => ({ ...prev, assignee: undefined }))
+        }}
         exclude={user ? [user.uid] : []}
+        error={fieldErrors.assignee}
       />
 
       <p className={styles.note}>
@@ -142,7 +153,7 @@ export default function CreateHeistForm() {
 
       {error && <p role="alert" className={styles.error}>{error}</p>}
 
-      <button type="submit" className="btn" disabled={!user || !assignee || submitting}>
+      <button type="submit" className="btn" disabled={!user || submitting}>
         {submitting ? "Creating heist…" : "Create heist"}
       </button>
     </form>
