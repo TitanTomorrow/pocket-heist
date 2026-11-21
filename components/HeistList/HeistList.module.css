@@ -26,10 +26,6 @@
   @apply break-words text-sm;
 }
 
-.time {
-  @apply shrink-0 font-semibold text-primary;
-}
-
 .outcome {
   @apply shrink-0 text-sm font-semibold uppercase tracking-wide;
 }

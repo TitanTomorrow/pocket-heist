@@ -27,10 +27,17 @@ function heist(id: string, overrides: Partial<Heist> = {}): Heist {
 const base = { loading: false, error: null, now }
 
 describe("HeistList", () => {
-  it("shows a loading placeholder while loading", () => {
+  it("shows three card placeholders under one status while open heists load", () => {
     render(<HeistList view="active" heists={[]} {...base} loading />)
-    expect(screen.getByRole("status")).toBeInTheDocument()
+    expect(screen.getAllByRole("status")).toHaveLength(1)
+    expect(screen.getAllByTestId("heist-card-skeleton")).toHaveLength(3)
     expect(screen.queryByRole("list")).not.toBeInTheDocument()
+  })
+
+  it("keeps the plain loading placeholder for expired heists", () => {
+    render(<HeistList view="expired" heists={[]} {...base} loading />)
+    expect(screen.getByRole("status")).toBeInTheDocument()
+    expect(screen.queryByTestId("heist-card-skeleton")).not.toBeInTheDocument()
   })
 
   it("shows the error message when loading failed", () => {
@@ -49,16 +56,18 @@ describe("HeistList", () => {
     expect(screen.queryByRole("link")).not.toBeInTheDocument()
   })
 
-  it("links each heist to its page and shows who assigned it, with time left", () => {
-    render(<HeistList view="active" heists={[heist("h1")]} {...base} />)
+  it("shows a card per active heist, linked to its page with who and time left", () => {
+    render(<HeistList view="active" heists={[heist("h1"), heist("h2")]} {...base} />)
+    expect(screen.getAllByRole("article")).toHaveLength(2)
     expect(screen.getByRole("link", { name: "Heist h1" })).toHaveAttribute("href", "/heists/h1")
-    expect(screen.getByText("From Velvet Otter")).toBeInTheDocument()
-    expect(screen.getByText("02:00:00")).toBeInTheDocument()
+    expect(screen.getAllByText("Velvet Otter")).toHaveLength(2)
+    expect(screen.getAllByText("Silent Falcon")).toHaveLength(2)
+    expect(screen.getAllByText("02:00:00")).toHaveLength(2)
   })
 
-  it("shows who an assigned heist went to", () => {
+  it("shows assigned heists as cards too", () => {
     render(<HeistList view="assigned" heists={[heist("h1")]} {...base} />)
-    expect(screen.getByText("To Silent Falcon")).toBeInTheDocument()
+    expect(screen.getByRole("article")).toHaveTextContent("Silent Falcon")
   })
 
   it("shows both people and the outcome for expired heists", () => {
@@ -72,7 +81,8 @@ describe("HeistList", () => {
     expect(screen.getByText("Success")).toBeInTheDocument()
     expect(screen.getByText("Failure")).toBeInTheDocument()
     expect(screen.getByText("Expired")).toBeInTheDocument()
-    // no countdowns for heists that are over
+    // no countdowns or cards for heists that are over
     expect(container.querySelector("time")).toBeNull()
+    expect(screen.queryByRole("article")).not.toBeInTheDocument()
   })
 })

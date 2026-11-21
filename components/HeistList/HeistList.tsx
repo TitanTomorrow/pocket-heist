@@ -1,5 +1,6 @@
 import Link from "next/link"
-import Countdown from "@/components/Countdown"
+import HeistCard from "@/components/HeistCard"
+import HeistCardSkeleton from "@/components/HeistCardSkeleton"
 import Skeleton from "@/components/Skeleton"
 import { heistOutcome } from "@/lib/heists"
 import type { HeistView } from "@/hooks/useHeists"
@@ -26,17 +27,16 @@ const OUTCOME_STYLES = {
   Expired: styles.expired,
 }
 
-// Who else is involved: who set an active heist, who an assigned one went
-// to, and both for an expired one
-function people(view: HeistView, heist: Heist) {
-  if (view === "active") return `From ${heist.createdByCodename}`
-  if (view === "assigned") return `To ${heist.assignedCodename}`
-  return `${heist.createdByCodename} → ${heist.assignedCodename}`
-}
+// Placeholders while open heists load: one row of the card grid
+const SKELETON_CARDS = 3
 
-// One dashboard section's heists, with its loading, error and empty states
+// One dashboard section's heists, with its loading, error and empty states.
+// Open heists (active and assigned) show as a grid of cards; expired heists
+// as a plain list of outcomes
 export default function HeistList({ view, heists, loading, error, now }: HeistListProps) {
-  if (loading) return <Skeleton />
+  const expired = view === "expired"
+
+  if (loading) return expired ? <Skeleton /> : <HeistCardSkeleton count={SKELETON_CARDS} />
 
   if (error) return <p className={styles.error} role="alert">{error}</p>
 
@@ -44,7 +44,7 @@ export default function HeistList({ view, heists, loading, error, now }: HeistLi
     return (
       <p className={styles.empty}>
         {EMPTY_MESSAGES[view]}
-        {view !== "expired" && (
+        {!expired && (
           <>
             {" "}
             <Link href="/heists/create" className={styles.createLink}>Create a heist</Link>
@@ -54,21 +54,29 @@ export default function HeistList({ view, heists, loading, error, now }: HeistLi
     )
   }
 
+  if (!expired) {
+    return (
+      <ul className="heist-grid">
+        {heists.map((heist) => (
+          <li key={heist.id}>
+            <HeistCard heist={heist} now={now} />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
   return (
     <ul className={styles.list}>
       {heists.map((heist) => {
-        const outcome = view === "expired" ? heistOutcome(heist) : null
+        const outcome = heistOutcome(heist)
         return (
           <li key={heist.id} className={styles.item}>
             <div className={styles.details}>
               <Link href={`/heists/${heist.id}`} className={styles.title}>{heist.title}</Link>
-              <span className={styles.people}>{people(view, heist)}</span>
+              <span className={styles.people}>{`${heist.createdByCodename} → ${heist.assignedCodename}`}</span>
             </div>
-            {outcome ? (
-              <span className={`${styles.outcome} ${OUTCOME_STYLES[outcome]}`}>{outcome}</span>
-            ) : (
-              <Countdown seconds={(heist.deadline.getTime() - now) / 1000} className={styles.time} />
-            )}
+            <span className={`${styles.outcome} ${OUTCOME_STYLES[outcome]}`}>{outcome}</span>
           </li>
         )
       })}

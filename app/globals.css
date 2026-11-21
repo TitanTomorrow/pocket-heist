@@ -11,6 +11,7 @@
   --color-error: #FF6467;
   --color-heading: white;
   --color-body: #99A1AF;
+  --color-border: #1E2939;
 }
 
 /* theme fonts: loaded with next/font in app/layout.tsx, which sets these variables on <html> */
@@ -73,6 +74,11 @@ svg.logo path {
 
 .preview-row {
   @apply mt-4 flex flex-wrap items-center gap-4;
+}
+
+/* heist cards and their loading placeholders: 1, 2 then 3 columns */
+.heist-grid {
+  @apply mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3;
 }
 
 /* buttons */
