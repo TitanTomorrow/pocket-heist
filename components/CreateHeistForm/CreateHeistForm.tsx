@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
+import { flushSync } from "react-dom"
 import { useRouter } from "next/navigation"
 import AssigneeSelect from "@/components/AssigneeSelect"
 import { useUser } from "@/components/UserProvider"
@@ -45,6 +46,8 @@ export default function CreateHeistForm() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [error, setError] = useState("")
   const [submitting, setSubmitting] = useState(false)
+  const titleRef = useRef<HTMLInputElement>(null)
+  const descriptionRef = useRef<HTMLTextAreaElement>(null)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -53,8 +56,15 @@ export default function CreateHeistForm() {
     const cleanTitle = title.trim()
     const cleanDescription = description.trim()
     const errors = validate(cleanTitle, cleanDescription)
-    setFieldErrors(errors)
-    if (errors.title || errors.description) return
+    if (errors.title || errors.description) {
+      // Render the errors first so the focused field is already linked to its
+      // message, and screen readers announce it along with the field
+      flushSync(() => setFieldErrors(errors))
+      if (errors.title) titleRef.current?.focus()
+      else descriptionRef.current?.focus()
+      return
+    }
+    setFieldErrors({})
 
     setSubmitting(true)
     setError("")
@@ -79,6 +89,7 @@ export default function CreateHeistForm() {
         <label htmlFor="heist-title" className={styles.label}>Title</label>
         <input
           id="heist-title"
+          ref={titleRef}
           type="text"
           required
           className={styles.input}
@@ -99,6 +110,7 @@ export default function CreateHeistForm() {
         <label htmlFor="heist-description" className={styles.label}>Description</label>
         <textarea
           id="heist-description"
+          ref={descriptionRef}
           required
           rows={4}
           className={styles.input}

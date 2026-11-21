@@ -1,4 +1,9 @@
+import type { Metadata } from "next"
 import CreateHeistForm from "@/components/CreateHeistForm"
+
+export const metadata: Metadata = {
+  title: "Create a heist",
+}
 
 export default function CreateHeistPage() {
   return (

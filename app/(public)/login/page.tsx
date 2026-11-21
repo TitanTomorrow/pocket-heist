@@ -1,5 +1,10 @@
+import type { Metadata } from "next"
 import AuthForm from "@/components/AuthForm"
 import AuthRedirect from "@/components/AuthRedirect"
+
+export const metadata: Metadata = {
+  title: "Log in",
+}
 
 export default function LogInPage() {
   return (

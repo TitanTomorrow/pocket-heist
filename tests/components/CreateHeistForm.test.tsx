@@ -95,6 +95,26 @@ describe("CreateHeistForm", () => {
     expect(m.createHeist).not.toHaveBeenCalled()
   })
 
+  it("moves focus to the first invalid field so its error is announced", async () => {
+    const user = userEvent.setup()
+    render(<CreateHeistForm />)
+    await fillIn(user, "   ", "  ")
+    await user.click(screen.getByRole("button", { name: "Create heist" }))
+    const title = screen.getByLabelText("Title")
+    expect(title).toHaveFocus()
+    expect(title).toHaveAccessibleDescription("Please enter a title")
+  })
+
+  it("moves focus to the description when only it is invalid", async () => {
+    const user = userEvent.setup()
+    render(<CreateHeistForm />)
+    await fillIn(user, "Title", "  ")
+    await user.click(screen.getByRole("button", { name: "Create heist" }))
+    const description = screen.getByLabelText("Description")
+    expect(description).toHaveFocus()
+    expect(description).toHaveAccessibleDescription("Please enter a description")
+  })
+
   it("blocks a title over 60 characters or a description over 500", async () => {
     const user = userEvent.setup()
     render(<CreateHeistForm />)

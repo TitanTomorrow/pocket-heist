@@ -37,7 +37,7 @@ export default function Navbar() {
           <div>📎 Steal the stapler. 💼 Keep your job. 😎</div>
         </header>
         <ul>
-          {/* Always rendered with a fixed width so nothing shifts when the user loads */}
+          {/* Always rendered, with a fixed width from sm up, so nothing shifts when the user loads */}
           <li className={styles.userSlot}>
             {user && (
               <>

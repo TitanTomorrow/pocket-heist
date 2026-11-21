@@ -5,7 +5,11 @@ import "@/app/globals.css"
 import UserProvider from "@/components/UserProvider"
 
 export const metadata: Metadata = {
-  title: "Pocket Heist",
+  // Each page sets its own title so tabs and screen readers can tell pages apart
+  title: {
+    template: "%s | Pocket Heist",
+    default: "Pocket Heist",
+  },
   description: "Steal the stapler. Keep your job.",
 }
 

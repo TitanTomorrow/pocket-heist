@@ -1,5 +1,7 @@
 // preview page for newly created UI components
 
+import type { Metadata } from "next"
+
 // components
 import Avatar from "@/components/Avatar"
 import Skeleton from "@/components/Skeleton"
@@ -43,6 +45,10 @@ const expiredHeists = [
   sampleHeist("p4", "Rename the office Wi-Fi", -2, { finalStatus: "failure" }),
   sampleHeist("p5", "Rickroll the all-hands slideshow", -20),
 ]
+
+export const metadata: Metadata = {
+  title: "Component preview",
+}
 
 export default function PreviewPage() {
   return (

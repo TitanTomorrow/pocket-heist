@@ -1,4 +1,9 @@
+import type { Metadata } from "next"
 import ReassignHeistForm from "@/components/ReassignHeistForm"
+
+export const metadata: Metadata = {
+  title: "Reassign heist",
+}
 
 export default async function ReassignHeistPage({
   params,

@@ -1,3 +1,9 @@
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Heist details",
+}
+
 export default function HeistDetailsPage() {
   return (
     <div className="page-content">
