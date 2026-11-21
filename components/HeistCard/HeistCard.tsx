@@ -20,7 +20,7 @@ const DEADLINE_FORMAT = new Intl.DateTimeFormat("en-US", {
 })
 
 function formatDeadline(date: Date) {
-  return DEADLINE_FORMAT.format(date).replace(/ /g, " ")
+  return DEADLINE_FORMAT.format(date).replace(/\u202F/g, " ")
 }
 
 // One open heist: its title links to the heist's page

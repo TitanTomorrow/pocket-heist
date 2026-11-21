@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import { Big_Shoulders_Stencil, Inter } from "next/font/google"
-// @ts-ignore Next.js handles global CSS imports at build time.
 import "@/app/globals.css"
 import UserProvider from "@/components/UserProvider"
 
