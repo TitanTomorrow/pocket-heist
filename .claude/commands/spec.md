@@ -63,6 +63,8 @@ If you cannot infer a sensible `feature_title` and `feature_slug`, ask the user 
 
 If `figma_hint` is present and Figma MCP tools are available:
 
+Use the **figma-design-extractor** subagent to provide a design guide for the feature, citing the 'figma hint'
+
 1. Use the Figma MCP tools to locate the component, layer or frame.  
 2. Record the component's name as shown in Figma as `figma_component_name`.
 3. Extract only information that is useful for implementation, such as:  
