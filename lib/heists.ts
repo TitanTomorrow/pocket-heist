@@ -1,4 +1,18 @@
-import { addDoc, collection, doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore"
+import {
+  addDoc,
+  and,
+  collection,
+  doc,
+  getDoc,
+  limit,
+  or,
+  orderBy,
+  query,
+  serverTimestamp,
+  updateDoc,
+  where,
+  type Query,
+} from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import type { CrewMember } from "@/lib/users"
 import {
@@ -68,6 +82,62 @@ export type ReassignBlocker = "not-allowed" | "closed"
 // reassignment checks in firestore.rules, which have the final say
 export function reassignBlocker(heist: Heist, uid: string, now: Date = new Date()): ReassignBlocker | null {
   if (uid !== heist.createdBy && uid !== heist.assignedTo) return "not-allowed"
-  if (heist.finalStatus !== "active" || heist.deadline.getTime() <= now.getTime()) return "closed"
+  if (!isHeistOpen(heist, now)) return "closed"
   return null
+}
+
+// Still in play: active and before its deadline
+export function isHeistOpen(heist: Heist, now: Date = new Date()): boolean {
+  return heist.finalStatus === "active" && heist.deadline.getTime() > now.getTime()
+}
+
+export type HeistOutcome = "Success" | "Failure" | "Expired"
+
+// How a closed heist ended. One still marked active is over because its
+// deadline passed; nothing updates its stored status
+export function heistOutcome(heist: Heist): HeistOutcome {
+  if (heist.finalStatus === "success") return "Success"
+  if (heist.finalStatus === "failure") return "Failure"
+  return "Expired"
+}
+
+// Most expired heists a user's list shows, latest deadline first
+export const EXPIRED_HEISTS_LIMIT = 20
+
+// Whose heists a query covers: those assigned to the user, those they
+// created, or either
+export type HeistRole = "assignee" | "creator" | "either"
+
+function roleFilter(uid: string, role: HeistRole) {
+  if (role === "assignee") return where("assignedTo", "==", uid)
+  if (role === "creator") return where("createdBy", "==", uid)
+  return or(where("createdBy", "==", uid), where("assignedTo", "==", uid))
+}
+
+function heistsCollection() {
+  return collection(db, COLLECTIONS.HEISTS).withConverter(heistConverter)
+}
+
+// The user's heists with a deadline after `after`, soonest first. Deadlines
+// are at most 72 hours after creation, so this stays small; callers split it
+// into open and closed heists themselves. Needs the (role field, deadline ASC)
+// composite indexes in firestore.indexes.json
+export function upcomingHeistsQuery(uid: string, role: HeistRole, after: Date): Query<Heist> {
+  return query(
+    heistsCollection(),
+    and(roleFilter(uid, role), where("deadline", ">", after)),
+    orderBy("deadline"),
+  )
+}
+
+// The latest EXPIRED_HEISTS_LIMIT heists the user created or is assigned to
+// with a deadline at or before `before`, latest first. Needs the
+// (role field, deadline DESC) composite indexes in firestore.indexes.json
+export function pastHeistsQuery(uid: string, before: Date): Query<Heist> {
+  return query(
+    heistsCollection(),
+    and(roleFilter(uid, "either"), where("deadline", "<=", before)),
+    orderBy("deadline", "desc"),
+    limit(EXPIRED_HEISTS_LIMIT),
+  )
 }

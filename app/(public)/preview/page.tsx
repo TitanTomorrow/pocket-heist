@@ -6,6 +6,34 @@ import Skeleton from "@/components/Skeleton"
 import AuthForm from "@/components/AuthForm"
 import Countdown from "@/components/Countdown"
 import CreateHeistForm from "@/components/CreateHeistForm"
+import HeistList from "@/components/HeistList"
+import type { Heist } from "@/types/firestore"
+
+// Fixed sample heists for HeistList, so the static page renders the same every time
+const HOUR = 60 * 60 * 1000
+const previewNow = new Date("2026-11-19T12:00:00Z").getTime()
+const sampleHeist = (id: string, title: string, hoursLeft: number, overrides: Partial<Heist> = {}): Heist => ({
+  id,
+  title,
+  description: "Sample heist",
+  createdBy: "u1",
+  createdByCodename: "Velvet Otter",
+  assignedTo: "u2",
+  assignedCodename: "Silent Falcon",
+  createdAt: new Date(previewNow - HOUR),
+  deadline: new Date(previewNow + hoursLeft * HOUR),
+  finalStatus: "active",
+  ...overrides,
+})
+const openHeists = [
+  sampleHeist("p1", "Swap the CEO's mug for a novelty one", 5.5),
+  sampleHeist("p2", "Hide every stapler on the third floor before the quarterly review", 41.2),
+]
+const expiredHeists = [
+  sampleHeist("p3", "Lift the last glazed donut", 3, { finalStatus: "success" }),
+  sampleHeist("p4", "Rename the office Wi-Fi", -2, { finalStatus: "failure" }),
+  sampleHeist("p5", "Rickroll the all-hands slideshow", -20),
+]
 
 export default function PreviewPage() {
   return (
@@ -54,6 +82,43 @@ export default function PreviewPage() {
         <p>The assignee list reads the users collection, so it only fills in when you&apos;re signed in.</p>
         <div className="preview-grid">
           <CreateHeistForm />
+        </div>
+      </section>
+
+      <section>
+        <h3>HeistList</h3>
+        <div className="preview-grid">
+          <div>
+            <h4>Active</h4>
+            <HeistList view="active" heists={openHeists} loading={false} error={null} now={previewNow} />
+          </div>
+          <div>
+            <h4>Assigned</h4>
+            <HeistList view="assigned" heists={openHeists} loading={false} error={null} now={previewNow} />
+          </div>
+          <div>
+            <h4>Expired</h4>
+            <HeistList view="expired" heists={expiredHeists} loading={false} error={null} now={previewNow} />
+          </div>
+          <div>
+            <h4>Empty</h4>
+            <HeistList view="active" heists={[]} loading={false} error={null} now={previewNow} />
+            <HeistList view="expired" heists={[]} loading={false} error={null} now={previewNow} />
+          </div>
+          <div>
+            <h4>Error</h4>
+            <HeistList
+              view="active"
+              heists={[]}
+              loading={false}
+              error="Couldn't load these heists. Try refreshing the page."
+              now={previewNow}
+            />
+          </div>
+          <div>
+            <h4>Loading</h4>
+            <HeistList view="active" heists={[]} loading error={null} now={previewNow} />
+          </div>
         </div>
       </section>
     </div>

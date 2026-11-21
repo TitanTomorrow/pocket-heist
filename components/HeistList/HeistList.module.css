@@ -1,0 +1,63 @@
+@reference "../../app/globals.css";
+
+.list {
+  @apply mt-4 flex flex-col gap-3;
+}
+
+.item {
+  @apply flex items-center justify-between gap-4 rounded-xl border border-lighter bg-light px-5 py-4;
+}
+
+/* min-w-0 lets long titles and code names wrap instead of widening the row */
+.details {
+  @apply flex min-w-0 flex-col gap-1;
+}
+
+.title {
+  @apply break-words font-semibold text-heading transition-colors duration-200;
+}
+
+.title:hover,
+.title:focus-visible {
+  @apply text-primary;
+}
+
+.people {
+  @apply break-words text-sm;
+}
+
+.time {
+  @apply shrink-0 font-semibold text-primary;
+}
+
+.outcome {
+  @apply shrink-0 text-sm font-semibold uppercase tracking-wide;
+}
+
+.success {
+  @apply text-success;
+}
+
+.failure {
+  @apply text-error;
+}
+
+.expired {
+  @apply text-body;
+}
+
+.empty {
+  @apply mt-4;
+}
+
+.createLink {
+  @apply font-semibold text-primary underline-offset-4;
+}
+
+.createLink:hover {
+  @apply underline;
+}
+
+.error {
+  @apply mt-4 text-error;
+}

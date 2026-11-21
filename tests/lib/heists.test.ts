@@ -6,8 +6,18 @@ const m = vi.hoisted(() => ({
 
 vi.mock("@/lib/firebase", () => ({ db: { name: "test-db" } }))
 
+// Query parts come back as plain descriptors, so tests can inspect a query
 vi.mock("firebase/firestore", () => ({
-  collection: (_db: unknown, path: string) => ({ path }),
+  collection: (_db: unknown, path: string) => ({
+    path,
+    withConverter: () => ({ path, converted: true }),
+  }),
+  query: (ref: unknown, ...parts: unknown[]) => ({ ref, parts }),
+  where: (field: string, op: string, value: unknown) => ({ where: [field, op, value] }),
+  and: (...filters: unknown[]) => ({ and: filters }),
+  or: (...filters: unknown[]) => ({ or: filters }),
+  orderBy: (field: string, dir = "asc") => ({ orderBy: [field, dir] }),
+  limit: (n: number) => ({ limit: n }),
   doc: (_db: unknown, ...path: string[]) => ({
     path: path.join("/"),
     withConverter: () => ({ path: path.join("/"), converted: true }),
@@ -21,9 +31,13 @@ vi.mock("firebase/firestore", () => ({
 import {
   createHeist,
   getHeist,
+  heistOutcome,
+  isHeistOpen,
+  pastHeistsQuery,
   randomHeistDeadline,
   reassignBlocker,
   reassignHeist,
+  upcomingHeistsQuery,
 } from "@/lib/heists"
 import type { Heist } from "@/types/firestore"
 
@@ -81,7 +95,8 @@ describe("createHeist", () => {
 
     expect(m.addDoc).toHaveBeenCalledTimes(1)
     const [ref, input] = m.addDoc.mock.calls[0]
-    expect(ref).toEqual({ path: "heists" })
+    expect(ref).toMatchObject({ path: "heists" })
+    expect(ref).not.toHaveProperty("converted")
     expect(input).toMatchObject({
       title: "The last glazed donut",
       description: "Lift it from the break room.",
@@ -174,5 +189,79 @@ describe("reassignBlocker", () => {
 
   it("blocks a heist whose deadline has passed", () => {
     expect(reassignBlocker({ ...heist, deadline: now }, "creator", now)).toBe("closed")
+  })
+})
+
+describe("isHeistOpen and heistOutcome", () => {
+  const now = new Date("2026-11-19T12:00:00Z")
+  const heist: Heist = {
+    id: "h1",
+    title: "t",
+    description: "d",
+    createdBy: "creator",
+    createdByCodename: "Silent Falcon",
+    assignedTo: "assignee",
+    assignedCodename: "Velvet Otter",
+    createdAt: new Date("2026-11-19T00:00:00Z"),
+    deadline: new Date("2026-11-20T12:00:00Z"),
+    finalStatus: "active",
+  }
+
+  it("treats an active heist before its deadline as open", () => {
+    expect(isHeistOpen(heist, now)).toBe(true)
+  })
+
+  it("treats a finished heist, or one at or past its deadline, as closed", () => {
+    expect(isHeistOpen({ ...heist, finalStatus: "success" }, now)).toBe(false)
+    expect(isHeistOpen({ ...heist, deadline: now }, now)).toBe(false)
+  })
+
+  it("names the outcome of a closed heist", () => {
+    expect(heistOutcome({ ...heist, finalStatus: "success" })).toBe("Success")
+    expect(heistOutcome({ ...heist, finalStatus: "failure" })).toBe("Failure")
+    expect(heistOutcome(heist)).toBe("Expired")
+  })
+})
+
+describe("heist queries", () => {
+  const when = new Date("2026-11-19T12:00:00Z")
+  const converted = { path: "heists", converted: true }
+
+  it("finds heists assigned to the user, due after a time, soonest first", () => {
+    expect(upcomingHeistsQuery("u1", "assignee", when)).toEqual({
+      ref: converted,
+      parts: [
+        { and: [{ where: ["assignedTo", "==", "u1"] }, { where: ["deadline", ">", when] }] },
+        { orderBy: ["deadline", "asc"] },
+      ],
+    })
+  })
+
+  it("finds heists the user created", () => {
+    const q = upcomingHeistsQuery("u1", "creator", when) as unknown as { parts: { and: unknown[] }[] }
+    expect(q.parts[0].and[0]).toEqual({ where: ["createdBy", "==", "u1"] })
+  })
+
+  it("finds heists the user either created or is assigned to", () => {
+    const q = upcomingHeistsQuery("u1", "either", when) as unknown as { parts: { and: unknown[] }[] }
+    expect(q.parts[0].and[0]).toEqual({
+      or: [{ where: ["createdBy", "==", "u1"] }, { where: ["assignedTo", "==", "u1"] }],
+    })
+  })
+
+  it("finds the user's 20 latest past heists, latest first", () => {
+    expect(pastHeistsQuery("u1", when)).toEqual({
+      ref: converted,
+      parts: [
+        {
+          and: [
+            { or: [{ where: ["createdBy", "==", "u1"] }, { where: ["assignedTo", "==", "u1"] }] },
+            { where: ["deadline", "<=", when] },
+          ],
+        },
+        { orderBy: ["deadline", "desc"] },
+        { limit: 20 },
+      ],
+    })
   })
 })
