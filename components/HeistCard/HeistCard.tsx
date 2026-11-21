@@ -2,25 +2,12 @@ import Link from "next/link"
 import { Calendar, Clock, User } from "lucide-react"
 import Countdown from "@/components/Countdown"
 import type { Heist } from "@/types/firestore"
+import LocalDeadline from "./LocalDeadline"
 import styles from "./HeistCard.module.css"
 
 interface HeistCardProps {
   heist: Heist
   now: number // when the heist was checked against the clock, in ms; seeds the countdown
-}
-
-// e.g. "Dec 5, 05:00 PM" in the viewer's timezone. Newer ICU versions put a
-// narrow no-break space before AM/PM; a plain space keeps it the same everywhere
-const DEADLINE_FORMAT = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: true,
-})
-
-function formatDeadline(date: Date) {
-  return DEADLINE_FORMAT.format(date).replace(/\u202F/g, " ")
 }
 
 // One open heist: its title links to the heist's page
@@ -49,7 +36,7 @@ export default function HeistCard({ heist, now }: HeistCardProps) {
         </p>
         <p className={styles.row}>
           <Calendar size={12} className={styles.icon} aria-hidden="true" />
-          <time dateTime={heist.deadline.toISOString()}>{formatDeadline(heist.deadline)}</time>
+          <LocalDeadline date={heist.deadline} />
           <span aria-hidden="true">•</span>
           {secondsLeft <= 0 ? (
             <span className={styles.timeLeft}>Overdue</span>

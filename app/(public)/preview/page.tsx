@@ -56,7 +56,7 @@ export default function PreviewPage() {
       <h1>Preview</h1>
 
       <section>
-        <h3>Avatar</h3>
+        <h2>Avatar</h2>
         <div className="preview-row">
           <Avatar name="alice" />
           <Avatar name="JohnDoe" />
@@ -66,7 +66,7 @@ export default function PreviewPage() {
       </section>
 
       <section>
-        <h3>Skeleton</h3>
+        <h2>Skeleton</h2>
         <div className="preview-grid">
           <Skeleton />
           <Skeleton />
@@ -76,7 +76,7 @@ export default function PreviewPage() {
       </section>
 
       <section>
-        <h3>AuthForm</h3>
+        <h2>AuthForm</h2>
         <div className="preview-grid">
           <AuthForm mode="login" />
           <AuthForm mode="signup" />
@@ -84,7 +84,7 @@ export default function PreviewPage() {
       </section>
 
       <section>
-        <h3>Countdown</h3>
+        <h2>Countdown</h2>
         <div className="preview-row">
           <Countdown seconds={41 * 3600 + 12 * 60 + 8} />
           <Countdown seconds={65} />
@@ -93,7 +93,7 @@ export default function PreviewPage() {
       </section>
 
       <section>
-        <h3>CreateHeistForm (with AssigneeSelect)</h3>
+        <h2>CreateHeistForm (with AssigneeSelect)</h2>
         <p>The assignee list reads the users collection, so it only fills in when you&apos;re signed in.</p>
         <div className="preview-grid">
           <CreateHeistForm />
@@ -101,7 +101,7 @@ export default function PreviewPage() {
       </section>
 
       <section>
-        <h3>HeistCard</h3>
+        <h2>HeistCard</h2>
         <div className="heist-grid">
           {cardHeists.map((heist) => (
             <HeistCard key={heist.id} heist={heist} now={previewNow} />
@@ -110,30 +110,37 @@ export default function PreviewPage() {
       </section>
 
       <section>
-        <h3>HeistCardSkeleton</h3>
+        <h2>HeistCardSkeleton</h2>
         <HeistCardSkeleton count={3} />
       </section>
 
+      {/* Each list of cards gets its own h2, as on /heists, so the cards' h3 titles sit under it */}
       <section>
-        <h3>HeistList</h3>
-        <h4>Active</h4>
+        <h2>HeistList: active</h2>
         <HeistList view="active" heists={openHeists} loading={false} error={null} now={previewNow} />
-        <h4>Assigned</h4>
+      </section>
+
+      <section>
+        <h2>HeistList: assigned</h2>
         <HeistList view="assigned" heists={openHeists} loading={false} error={null} now={previewNow} />
-        <h4>Loading</h4>
+      </section>
+
+      <section>
+        <h2>HeistList: other states</h2>
+        <h3>Loading</h3>
         <HeistList view="active" heists={[]} loading error={null} now={previewNow} />
         <div className="preview-grid">
           <div>
-            <h4>Expired</h4>
+            <h3>Expired</h3>
             <HeistList view="expired" heists={expiredHeists} loading={false} error={null} now={previewNow} />
           </div>
           <div>
-            <h4>Empty</h4>
+            <h3>Empty</h3>
             <HeistList view="active" heists={[]} loading={false} error={null} now={previewNow} />
             <HeistList view="expired" heists={[]} loading={false} error={null} now={previewNow} />
           </div>
           <div>
-            <h4>Error</h4>
+            <h3>Error</h3>
             <HeistList
               view="active"
               heists={[]}
@@ -143,7 +150,7 @@ export default function PreviewPage() {
             />
           </div>
           <div>
-            <h4>Loading (expired)</h4>
+            <h3>Loading (expired)</h3>
             <HeistList view="expired" heists={[]} loading error={null} now={previewNow} />
           </div>
         </div>

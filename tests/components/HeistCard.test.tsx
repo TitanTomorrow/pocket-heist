@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react"
+import { renderToString } from "react-dom/server"
 import { describe, it, expect } from "vitest"
 import type { Heist } from "@/types/firestore"
 
@@ -53,6 +54,12 @@ describe("HeistCard", () => {
     render(<HeistCard heist={heist()} now={deadline.getTime() + HOUR} />)
     expect(screen.getByText("Overdue")).toBeInTheDocument()
     expect(screen.queryByText(/^\d{2}:\d{2}:\d{2}$/)).not.toBeInTheDocument()
+  })
+
+  it("leaves the deadline's text to the browser, so the server's timezone never shows", () => {
+    const html = renderToString(<HeistCard heist={heist()} now={twoHoursBefore} />)
+    expect(html).toContain(`dateTime="${deadline.toISOString()}"`)
+    expect(html).not.toContain("Dec 5")
   })
 
   it("keeps the full title as the link name when it's long", () => {
