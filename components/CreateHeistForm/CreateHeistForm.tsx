@@ -58,7 +58,8 @@ export default function CreateHeistForm() {
     const errors = validate(cleanTitle, cleanDescription)
     if (errors.title || errors.description) {
       // Render the errors first so the focused field is already linked to its
-      // message, and screen readers announce it along with the field
+      // message. The messages are alerts too, because focusing a field that
+      // already has focus (Enter in Title) announces nothing
       flushSync(() => setFieldErrors(errors))
       if (errors.title) titleRef.current?.focus()
       else descriptionRef.current?.focus()
@@ -102,7 +103,7 @@ export default function CreateHeistForm() {
           }}
         />
         {fieldErrors.title && (
-          <p id="heist-title-error" className={styles.error}>{fieldErrors.title}</p>
+          <p id="heist-title-error" role="alert" className={styles.error}>{fieldErrors.title}</p>
         )}
       </div>
 
@@ -123,7 +124,7 @@ export default function CreateHeistForm() {
           }}
         />
         {fieldErrors.description && (
-          <p id="heist-description-error" className={styles.error}>{fieldErrors.description}</p>
+          <p id="heist-description-error" role="alert" className={styles.error}>{fieldErrors.description}</p>
         )}
       </div>
 

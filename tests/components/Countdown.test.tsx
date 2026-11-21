@@ -47,4 +47,25 @@ describe("Countdown", () => {
     render(<Countdown seconds={3661} />)
     expect(screen.getByText("01:01:01")).toHaveAttribute("datetime", "PT1H1M1S")
   })
+
+  it("restarts when the seconds prop changes", () => {
+    const { rerender } = render(<Countdown seconds={61} />)
+    expect(screen.getByText("00:01:01")).toBeInTheDocument()
+
+    rerender(<Countdown seconds={120} />)
+
+    expect(screen.getByText("00:02:00")).toBeInTheDocument()
+  })
+
+  it("uses elapsed wall time when the browser delays an interval", () => {
+    vi.setSystemTime(new Date("2026-11-21T12:00:00Z"))
+    render(<Countdown seconds={100} />)
+
+    vi.setSystemTime(Date.now() + 65_000)
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    expect(screen.getByText("00:00:34")).toBeInTheDocument()
+  })
 })

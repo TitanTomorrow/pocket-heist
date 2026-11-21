@@ -8,7 +8,7 @@ interface HeistCardSkeletonProps {
 // screen readers hear "Loading" once rather than once per placeholder
 export default function HeistCardSkeleton({ count = 1 }: HeistCardSkeletonProps) {
   return (
-    <div className="heist-grid" role="status" aria-busy="true">
+    <div className="heist-grid" role="status">
       {Array.from({ length: count }, (_, i) => (
         <div key={i} className={styles.card} aria-hidden="true" data-testid="heist-card-skeleton">
           <div className={styles.title}>

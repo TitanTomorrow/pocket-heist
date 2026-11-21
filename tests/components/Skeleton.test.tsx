@@ -10,7 +10,8 @@ describe("Skeleton", () => {
 
     const status = screen.getByRole("status")
     expect(status).toBeInTheDocument()
-    expect(status).toHaveAttribute("aria-busy", "true")
+    // aria-busy would hold back the announcement, and it is never cleared
+    expect(status).not.toHaveAttribute("aria-busy")
   })
 
   it("includes screen reader loading text", () => {

@@ -31,8 +31,10 @@ h1, h2, h3, h4 {
 }
 
 /* generic layout styles */
+/* form titles keep .form-title's size; this rule would otherwise outrank it.
+   :where() adds no specificity, so .splash .headline still wins on the splash */
 .public {
-  h1 {
+  h1:not(:where(.form-title)) {
     @apply text-4xl;
   }
 }

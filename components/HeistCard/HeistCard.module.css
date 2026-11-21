@@ -1,8 +1,9 @@
 @reference "../../app/globals.css";
 
-/* height follows the title, so cards with one- and two-line titles share a row */
+/* fills its grid cell (or the li wrapping it), so cards with one- and two-line
+   titles in the same row end at the same height */
 .card {
-  @apply flex min-w-0 flex-col gap-3 rounded-[10px] border border-border bg-lighter p-5;
+  @apply flex h-full min-w-0 flex-col gap-3 rounded-[10px] border border-border bg-lighter p-5;
 }
 
 .header {

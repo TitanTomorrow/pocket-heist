@@ -115,6 +115,17 @@ describe("CreateHeistForm", () => {
     expect(description).toHaveAccessibleDescription("Please enter a description")
   })
 
+  it("announces the error when Enter is pressed in the already-focused title", async () => {
+    const user = userEvent.setup()
+    render(<CreateHeistForm />)
+    await fillIn(user, "Title", "Description")
+    const title = screen.getByLabelText("Title")
+    await user.clear(title)
+    await user.type(title, "   {Enter}")
+    expect(title).toHaveFocus()
+    expect(screen.getByRole("alert")).toHaveTextContent("Please enter a title")
+  })
+
   it("blocks a title over 60 characters or a description over 500", async () => {
     const user = userEvent.setup()
     render(<CreateHeistForm />)
