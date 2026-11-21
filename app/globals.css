@@ -12,6 +12,8 @@
   --color-heading: white;
   --color-body: #99A1AF;
   --color-border: #1E2939;
+  /* form control borders: 3:1 or more against dark, light and lighter (WCAG 1.4.11) */
+  --color-field: #6A7282;
 }
 
 /* theme fonts: loaded with next/font in app/layout.tsx, which sets these variables on <html> */

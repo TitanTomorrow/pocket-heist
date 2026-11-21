@@ -10,6 +10,7 @@ export default function HeistsPage() {
 
   return (
     <div className="page-content">
+      <h1 className="sr-only">Your Heists</h1>
       <div className="active-heists">
         <h2>Your Active Heists</h2>
         <HeistList view="active" {...active} />

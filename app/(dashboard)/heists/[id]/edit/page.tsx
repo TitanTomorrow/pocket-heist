@@ -9,7 +9,7 @@ export default async function ReassignHeistPage({
   return (
     <div className="center-content">
       <div className="page-content">
-        <h2 className="form-title">Reassign Heist</h2>
+        <h1 className="form-title">Reassign Heist</h1>
         <ReassignHeistForm heistId={id} />
       </div>
     </div>

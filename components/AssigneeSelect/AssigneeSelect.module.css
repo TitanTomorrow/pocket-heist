@@ -9,7 +9,7 @@
 }
 
 .select {
-  @apply w-full truncate rounded-lg border border-lighter bg-light px-3 py-2 text-heading;
+  @apply w-full truncate rounded-lg border border-field bg-light px-3 py-2 text-heading;
 }
 .select:disabled {
   @apply cursor-not-allowed text-body;

@@ -13,7 +13,7 @@
 }
 
 .input {
-  @apply w-full rounded-lg border border-lighter bg-light px-3 py-2 text-heading;
+  @apply w-full rounded-lg border border-field bg-light px-3 py-2 text-heading;
 }
 .input:focus-visible {
   @apply outline-2 outline-offset-1 outline-primary;

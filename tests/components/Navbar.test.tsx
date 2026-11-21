@@ -27,11 +27,16 @@ describe("Navbar", () => {
     m.logOut.mockResolvedValue(undefined)
   })
 
-  it("renders the main heading", () => {
+  it("renders the logo as a home link named Pocket Heist", () => {
     render(<Navbar />)
 
-    const heading = screen.getByRole("heading", { level: 1 })
-    expect(heading).toBeInTheDocument()
+    const logo = screen.getByRole("link", { name: "Pocket Heist" })
+    expect(logo).toHaveAttribute("href", "/heists")
+  })
+
+  it("leaves the page heading to the page", () => {
+    render(<Navbar />)
+    expect(screen.queryByRole("heading")).not.toBeInTheDocument()
   })
 
   it("renders the Create Heist link", () => {

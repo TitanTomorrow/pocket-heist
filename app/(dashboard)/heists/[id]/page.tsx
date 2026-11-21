@@ -1,7 +1,7 @@
 export default function HeistDetailsPage() {
   return (
     <div className="page-content">
-      <h2>Heist Details</h2>
+      <h1>Heist Details</h1>
     </div>
   )
 }

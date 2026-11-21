@@ -46,12 +46,13 @@
   @apply mt-4;
 }
 
+/* underlined, not just coloured, so it stands out from the sentence (WCAG 1.4.1) */
 .createLink {
-  @apply font-semibold text-primary underline-offset-4;
+  @apply font-semibold text-primary underline underline-offset-4;
 }
 
 .createLink:hover {
-  @apply underline;
+  @apply text-secondary;
 }
 
 .error {

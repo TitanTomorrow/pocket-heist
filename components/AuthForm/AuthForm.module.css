@@ -13,7 +13,7 @@
 }
 
 .input {
-  @apply w-full rounded-lg border border-lighter bg-light px-3 py-2 text-heading;
+  @apply w-full rounded-lg border border-field bg-light px-3 py-2 text-heading;
 }
 
 .input:focus-visible {
@@ -45,8 +45,9 @@
   @apply text-center text-sm;
 }
 
+/* underlined, not just coloured, so it stands out from the sentence (WCAG 1.4.1) */
 .link {
-  @apply font-semibold text-primary;
+  @apply font-semibold text-primary underline underline-offset-4;
 }
 
 .link:hover {

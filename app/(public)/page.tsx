@@ -17,8 +17,13 @@ export default function Home() {
       <AuthRedirect signedInTo="/heists" />
 
       <div className={styles.pitch}>
+        {/* The clock stands in for the "o", so screen readers get the name
+            as text instead of "Pcket Heist" */}
         <p className={styles.logo}>
-          P<Clock8 className="logo" strokeWidth={2.75} />cket Heist
+          <span className="sr-only">Pocket Heist</span>
+          <span className={styles.wordmark} aria-hidden="true">
+            P<Clock8 className="logo" strokeWidth={2.75} />cket Heist
+          </span>
         </p>
 
         <h1 className={styles.headline}>

@@ -41,6 +41,11 @@ describe("HeistsPage", () => {
     m.results = { active: ready([]), assigned: ready([]), expired: ready([]) }
   })
 
+  it("has a single page heading above the sections", () => {
+    render(<HeistsPage />)
+    expect(screen.getByRole("heading", { level: 1, name: "Your Heists" })).toBeInTheDocument()
+  })
+
   it("shows the three sections", () => {
     render(<HeistsPage />)
     const headings = screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent)

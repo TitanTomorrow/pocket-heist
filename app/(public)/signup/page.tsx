@@ -6,7 +6,7 @@ export default function SignupPage() {
     <div className="center-content">
       <AuthRedirect signedInTo="/heists" />
       <div className="page-content">
-        <h2 className="form-title">Signup for an Account</h2>
+        <h1 className="form-title">Signup for an Account</h1>
         <AuthForm mode="signup" />
       </div>
     </div>

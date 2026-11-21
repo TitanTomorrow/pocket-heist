@@ -27,9 +27,13 @@ export default function Navbar() {
     <div className={styles.siteNav}>
       <nav>
         <header>
-          <h1>
-            <Link href="/heists">P<Clock8 className={`logo ${styles.logo}`} size={14} strokeWidth={2.75} />cket Heist</Link>
-          </h1>
+          {/* Not a heading: each page has its own h1. The clock stands in for
+              the "o", so the link is named explicitly or it reads "Pcket Heist" */}
+          <p className={styles.brand}>
+            <Link href="/heists" aria-label="Pocket Heist">
+              P<Clock8 className={`logo ${styles.logo}`} size={14} strokeWidth={2.75} aria-hidden="true" />cket Heist
+            </Link>
+          </p>
           <div>📎 Steal the stapler. 💼 Keep your job. 😎</div>
         </header>
         <ul>
