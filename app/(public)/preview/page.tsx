@@ -11,6 +11,7 @@ import CreateHeistForm from "@/components/CreateHeistForm"
 import HeistList from "@/components/HeistList"
 import HeistCard from "@/components/HeistCard"
 import HeistCardSkeleton from "@/components/HeistCardSkeleton"
+import Footer from "@/components/Footer"
 import type { Heist } from "@/types/firestore"
 
 // Fixed sample heists for HeistCard and HeistList, so the static page renders the same every time
@@ -154,6 +155,12 @@ export default function PreviewPage() {
             <HeistList view="expired" heists={[]} loading error={null} now={previewNow} />
           </div>
         </div>
+      </section>
+
+      {/* inside main and a section, so this copy isn't a second contentinfo landmark */}
+      <section>
+        <h2>Footer</h2>
+        <Footer />
       </section>
     </div>
   )

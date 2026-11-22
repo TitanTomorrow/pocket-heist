@@ -3,7 +3,7 @@
 /* Rules are scoped under .splash so they outrank `.public h1` in globals.css */
 
 .splash {
-  @apply mx-auto grid min-h-lvh max-w-6xl content-center gap-14 px-4 py-12;
+  @apply mx-auto grid w-full flex-1 max-w-6xl content-center gap-14 px-4 py-12;
   @apply sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:gap-16;
 }
 
