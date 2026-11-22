@@ -1,0 +1,1 @@
+Execute both a11y-reviewer and code-quality-reviewer sub agents by first creating and plan and then executing it It should be on any non committed changes.
