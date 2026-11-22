@@ -23,8 +23,13 @@
 }
 
 /* typography */
+/* page shell: a full-height column of (optional navbar), main, footer.
+   main grows to fill the space, which keeps the footer at the bottom of short pages */
 body {
- @apply font-sans text-body bg-dark;
+ @apply font-sans text-body bg-dark flex min-h-dvh flex-col;
+}
+body > main {
+  @apply flex flex-1 flex-col;
 }
 h1, h2, h3, h4 {
   @apply text-heading;
@@ -67,7 +72,7 @@ svg.logo path {
   @apply my-4 mx-auto w-6xl max-w-full;
 }
 .center-content {
-  @apply flex flex-col justify-center text-justify min-h-lvh;
+  @apply flex flex-col justify-center text-justify flex-1;
 }
 .form-title {
   @apply text-center text-xl font-bold;

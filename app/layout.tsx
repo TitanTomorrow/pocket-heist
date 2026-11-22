@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   description: "Steal the stapler. Keep your job.",
 }
 
+// Re-render every route at most once a day, so the Footer's server-rendered
+// year rolls over at New Year without a redeploy
+export const revalidate = 86400
+
 // Self-hosted by next/font; globals.css maps these variables to font-sans and font-stencil
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
 // next/font has no metrics for this font, so its size-adjusted fallback is
