@@ -1,0 +1,43 @@
+@reference "../../app/globals.css";
+
+.details {
+  @apply mx-auto mt-6 flex w-full max-w-2xl flex-col gap-6 rounded-xl border border-border bg-lighter p-6;
+}
+
+.title {
+  @apply text-2xl font-bold wrap-break-word;
+}
+
+/* one column on phones, three side by side from sm up */
+.facts {
+  @apply grid grid-cols-1 gap-4 sm:grid-cols-3;
+}
+.facts dt,
+.label {
+  @apply text-sm;
+}
+.facts dd {
+  @apply mt-0.5 font-semibold wrap-break-word text-heading;
+}
+
+/* scoped under .facts to outrank the dd colour above */
+.facts .to {
+  @apply text-primary;
+}
+
+.facts .by {
+  @apply text-secondary;
+}
+
+.timeLeft {
+  @apply text-lg;
+}
+
+.section {
+  @apply border-t border-border pt-4;
+}
+
+/* keeps the line breaks the planner typed */
+.description {
+  @apply mt-1 whitespace-pre-line wrap-break-word text-heading;
+}

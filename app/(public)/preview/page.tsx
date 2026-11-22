@@ -11,6 +11,7 @@ import CreateHeistForm from "@/components/CreateHeistForm"
 import HeistList from "@/components/HeistList"
 import HeistCard from "@/components/HeistCard"
 import HeistCardSkeleton from "@/components/HeistCardSkeleton"
+import HeistDetails from "@/components/HeistDetails"
 import Footer from "@/components/Footer"
 import type { Heist } from "@/types/firestore"
 
@@ -41,6 +42,14 @@ const cardHeists = [
   sampleHeist("c3", "Steal the last slice of birthday cake", 0.05),
   sampleHeist("c4", "Rename the office Wi-Fi", -2),
 ]
+// HeistDetails: a full description while it's open, and one that has ended
+const detailsHeist = sampleHeist("d1", "Swap the CEO's mug", 5.5, {
+  description: "Replace it with the one that says World's Okayest Boss.\nPut the old one back before Friday's board meeting.",
+})
+const finishedHeist = sampleHeist("d2", "Lift the last glazed donut", 3, {
+  description: "Before the 10am stand-up.",
+  finalStatus: "success",
+})
 const expiredHeists = [
   sampleHeist("p3", "Lift the last glazed donut", 3, { finalStatus: "success" }),
   sampleHeist("p4", "Rename the office Wi-Fi", -2, { finalStatus: "failure" }),
@@ -107,6 +116,15 @@ export default function PreviewPage() {
           {cardHeists.map((heist) => (
             <HeistCard key={heist.id} heist={heist} now={previewNow} />
           ))}
+        </div>
+      </section>
+
+      {/* headingLevel 3 keeps the titles under this h2; on its own page the title is the h1 */}
+      <section>
+        <h2>HeistDetails</h2>
+        <div className="preview-grid">
+          <HeistDetails heist={detailsHeist} now={previewNow} headingLevel={3} />
+          <HeistDetails heist={finishedHeist} now={previewNow} headingLevel={3} />
         </div>
       </section>
 

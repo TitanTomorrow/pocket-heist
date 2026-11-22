@@ -1,0 +1,27 @@
+@reference "../../app/globals.css";
+
+.loading {
+  @apply mx-auto mt-6 flex max-w-2xl justify-center;
+}
+
+.message {
+  @apply mx-auto mt-6 flex max-w-md flex-col items-center gap-3 text-center;
+}
+
+.heading {
+  @apply text-xl font-bold;
+}
+
+.back {
+  @apply mt-4 text-center;
+}
+
+.link {
+  @apply font-semibold text-primary;
+}
+.link:hover {
+  @apply text-secondary;
+}
+.link:focus-visible {
+  @apply rounded-sm outline-2 outline-offset-2 outline-secondary;
+}
