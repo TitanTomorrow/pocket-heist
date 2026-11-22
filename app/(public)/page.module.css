@@ -56,6 +56,11 @@
   @apply w-full max-w-md justify-self-center lg:justify-self-end;
 }
 
+/* sits on the ticket's top edge, as if peeking over it */
+.splash .duck {
+  @apply relative z-10 mx-auto -mb-6 h-auto w-40 sm:w-48;
+}
+
 .splash .ticket {
   @apply rounded-2xl border border-lighter bg-light p-6 sm:p-8;
 }

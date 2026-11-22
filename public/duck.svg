@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 180" width="220" height="180">
+  <!-- tail -->
+  <path d="M38 112 C20 92 18 74 30 66 C38 84 52 96 70 102 Z" fill="#F5B800"/>
+  <!-- body -->
+  <ellipse cx="102" cy="122" rx="74" ry="44" fill="#FFD43B"/>
+  <!-- wing -->
+  <path d="M68 112 C82 92 122 92 138 110 C126 134 92 140 70 128 Z" fill="#F5B800"/>
+  <!-- head -->
+  <circle cx="146" cy="68" r="38" fill="#FFD43B"/>
+  <!-- beak -->
+  <path d="M176 70 C192 64 208 68 212 78 C204 88 188 90 174 84 Z" fill="#FF922B"/>
+  <path d="M176 79 C188 81 200 80 210 77" stroke="#E8590C" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- burglar's mask, with ties trailing behind the head -->
+  <path d="M112 56 C130 48 166 48 182 58 L182 74 C166 66 130 66 112 74 Z" fill="#030712"/>
+  <path d="M114 62 C102 56 94 60 90 52 M114 66 C100 68 94 76 86 72" stroke="#030712" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <!-- eye, peering out through the mask -->
+  <ellipse cx="160" cy="63" rx="7" ry="6" fill="#FFFFFF"/>
+  <circle cx="162" cy="63" r="3.5" fill="#030712"/>
+</svg>

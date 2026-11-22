@@ -1,6 +1,7 @@
 // Splash page: logged-in users are sent on to /heists; everyone else stays
 // here and can register or log in
 
+import Image from "next/image"
 import Link from "next/link"
 import { Clock8 } from "lucide-react"
 import AuthRedirect from "@/components/AuthRedirect"
@@ -50,6 +51,14 @@ export default function Home() {
       </div>
 
       <figure className={styles.example}>
+        {/* the crew's mascot, peeking over the top of the example heist */}
+        <Image
+          src="/duck.svg"
+          alt="A yellow duck wearing a burglar's mask"
+          width={220}
+          height={180}
+          className={styles.duck}
+        />
         <article className={styles.ticket} aria-label="Example heist">
           <h2 className={styles.ticketTitle}>The last glazed donut</h2>
           <p className={styles.ticketBody}>
